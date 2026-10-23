@@ -1,0 +1,29 @@
+ARCO - versión instalable
+=========================
+
+Por qué existe esta versión
+Dentro de Claude el navegador bloquea los sensores del celular. Publicada en una
+dirección https propia, Arco puede usar el acelerómetro como inclinómetro.
+
+1) Publicar (una sola vez, gratis)
+   Opción A, Netlify Drop: entra a https://app.netlify.com/drop, arrastra esta
+   carpeta (descomprimida) y copia la dirección https que te entrega.
+   Opción B, GitHub Pages: crea un repositorio, sube todos estos archivos y
+   activa Pages en Settings > Pages.
+   La dirección será pública, pero no contiene datos de pacientes: las fichas
+   quedan solo en el dispositivo donde las uses.
+
+2) Instalar en el celular
+   iPhone: abre la dirección en Safari > Compartir > Agregar a pantalla de inicio.
+   Android: abre la dirección en Chrome > menú > Instalar aplicación.
+
+3) Usar el inclinómetro
+   Medir > Inclinómetro > Iniciar sensor. En iPhone, acepta el permiso
+   "Movimiento y orientación".
+
+4) Pasar tus fichas desde la versión de Claude
+   En la versión de Claude: Pacientes > Descargar respaldo.
+   En la versión instalada: Pacientes > Restaurar respaldo.
+
+Actualizaciones: reemplaza los archivos publicados. Si cambias index.html, sube el
+número de versión de CACHE en sw.js (por ejemplo arco-v2).

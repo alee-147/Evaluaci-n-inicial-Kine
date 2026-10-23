@@ -1,0 +1,1609 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0A6C7E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Arco">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Arco Kinesio</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: app de una columna en celular (cabecera fija, vistas, barra inferior); en pantallas anchas la vista de medición se divide en lienzo + panel. */
+:root{
+  --bg:#F2F5F6; --surface:#FFFFFF; --surface-2:#E8EEF0; --ink:#12232B; --muted:#5A6E78; --line:#D3DDE1;
+  --accent:#0A6C7E; --accent-ink:#FFFFFF; --accent-soft:#D9ECEF; --signal:#E4572E;
+  --ok:#1F7A4D; --ok-soft:#DCEFE4; --warn:#9A6208; --warn-soft:#F6E8C9; --crit:#B3312B; --crit-soft:#F6DAD7;
+  --font-ui:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-display:"Instrument Serif",Georgia,"Times New Roman",serif;
+  --font-data:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E181E; --surface:#16252D; --surface-2:#1E3039; --ink:#E6EEF1; --muted:#93A8B1; --line:#27404B;
+    --accent:#4DB4C6; --accent-ink:#06222A; --accent-soft:#17353E;
+    --ok:#5CC48C; --ok-soft:#173627; --warn:#E3B04E; --warn-soft:#3A2E12; --crit:#F08A83; --crit-soft:#401C1A;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E181E; --surface:#16252D; --surface-2:#1E3039; --ink:#E6EEF1; --muted:#93A8B1; --line:#27404B;
+  --accent:#4DB4C6; --accent-ink:#06222A; --accent-soft:#17353E;
+  --ok:#5CC48C; --ok-soft:#173627; --warn:#E3B04E; --warn-soft:#3A2E12; --crit:#F08A83; --crit-soft:#401C1A;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{
+  background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:0 92px;
+}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:960px;margin:0 auto}
+h1,h2,h3{margin:0;font-weight:600;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:20px}
+h3{font-size:15px}
+p{margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--font-data);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.eyebrow{font-family:var(--font-data);font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+
+/* Cabecera */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--bg);border-bottom:1px solid var(--line);
+  margin-inline:calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px))}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand svg{flex:none;color:var(--accent)}
+.wordmark{font-family:var(--font-display);font-size:28px;line-height:1;letter-spacing:-.01em}
+.chip-patient{display:flex;align-items:center;gap:8px;max-width:58%;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-size:13px;font-weight:500}
+.chip-patient span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip-patient i{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
+.chip-patient.on i{background:var(--ok)}
+
+/* Vistas */
+main{padding-top:20px}
+.view{display:flex;flex-direction:column;gap:16px}
+.view-head{display:flex;flex-direction:column;gap:4px}
+.view-head p{color:var(--muted);max-width:60ch}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}
+.card.flat{background:transparent;border-style:dashed}
+.stack{display:flex;flex-direction:column;gap:12px;min-width:0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.split{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+@media (min-width:880px){.split{grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);align-items:start}}
+
+/* Formularios */
+label.f{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.02em;min-width:0}
+input[type=text],input[type=number],select,textarea{width:100%;min-width:0;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:15px;color:var(--ink)}
+textarea{resize:vertical;min-height:64px}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--ink)}
+.check input{margin-top:3px;width:18px;height:18px;accent-color:var(--accent);flex:none}
+
+/* Botones */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-weight:600;font-size:14px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:transparent}
+.btn.danger{color:var(--crit);border-color:var(--crit)}
+.btn.sm{min-height:36px;padding:0 12px;font-size:13px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.seg{display:flex;background:var(--surface-2);border-radius:10px;padding:3px;gap:2px;min-width:0}
+.seg button{flex:1;min-width:0;border:0;background:transparent;border-radius:8px;padding:8px 6px;font-size:13px;font-weight:600;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+
+/* Pacientes */
+.plist{display:flex;flex-direction:column;gap:8px}
+.pitem{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.pitem[aria-current="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.pitem .nm{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pitem .meta{font-size:12px;color:var(--muted)}
+.tag{display:inline-block;font-family:var(--font-data);font-size:11px;padding:2px 8px;border-radius:999px;background:var(--surface-2);color:var(--muted)}
+.tag.ex{background:var(--warn-soft);color:var(--warn)}
+.notice{font-size:13px;color:var(--muted);display:flex;gap:10px;align-items:flex-start}
+
+/* Lienzo */
+.stage{position:relative;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;overflow:hidden;min-width:0}
+.stage canvas{display:block;width:100%;height:auto;touch-action:none;cursor:crosshair}
+.stage-bar{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px}
+.step{font-size:13px;color:var(--muted)}
+.step b{color:var(--ink)}
+.vidbar{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+
+/* Resultado */
+.readout{display:flex;flex-direction:column;gap:6px}
+.big{font-family:var(--font-display);font-size:72px;line-height:.95;letter-spacing:-.02em}
+.big sup{font-size:.45em;vertical-align:top;position:relative;top:.1em;margin-left:2px;color:var(--muted)}
+.big.empty{color:var(--line)}
+.rangebar{position:relative;height:10px;border-radius:5px;background:var(--surface-2);overflow:hidden}
+.rangebar i{position:absolute;inset:0 auto 0 0;background:var(--accent);border-radius:5px}
+.rangeref{display:flex;justify-content:space-between;font-family:var(--font-data);font-size:11px;color:var(--muted)}
+.status{display:inline-flex;align-self:flex-start;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px}
+.status.ok{background:var(--ok-soft);color:var(--ok)}
+.status.warn{background:var(--warn-soft);color:var(--warn)}
+.status.crit{background:var(--crit-soft);color:var(--crit)}
+.status.none{background:var(--surface-2);color:var(--muted)}
+.hint{font-size:13px;color:var(--muted);background:var(--bg);border-radius:8px;padding:10px 12px;border-left:3px solid var(--accent)}
+table.data{width:100%;border-collapse:collapse;font-size:14px}
+table.data th{font-family:var(--font-data);font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:6px 8px 6px 0;border-bottom:1px solid var(--line)}
+table.data td{padding:9px 8px 9px 0;border-bottom:1px solid var(--line);vertical-align:top}
+table.data td.n{font-family:var(--font-data);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+table.data th.n{text-align:right}
+.scroll-x{overflow-x:auto;min-width:0}
+
+/* Pruebas */
+.clock{font-family:var(--font-data);font-variant-numeric:tabular-nums;font-size:64px;line-height:1;letter-spacing:-.02em;text-align:center;padding:12px 0}
+.tapbtn{min-height:150px;width:100%;border-radius:16px;border:2px solid var(--accent);background:var(--accent-soft);color:var(--accent);font-family:var(--font-display);font-size:64px}
+.tapbtn:active{background:var(--accent);color:var(--accent-ink)}
+.tapbtn:disabled{opacity:.4}
+
+/* Historial */
+.rec{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.rec:last-child{border-bottom:0}
+.rec .t{font-weight:600}
+.rec .v{font-family:var(--font-data);font-variant-numeric:tabular-nums;font-weight:500;text-align:right}
+.rec .m{grid-column:1 / -1;font-size:12px;color:var(--muted)}
+.evo{display:grid;grid-template-columns:minmax(0,1fr) 96px auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.evo:last-child{border-bottom:0}
+.delta{font-family:var(--font-data);font-size:13px;font-weight:500;text-align:right;white-space:nowrap}
+
+/* Barra inferior */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:9;background:var(--surface);border-top:1px solid var(--line);
+  padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+.tabs .wrap{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px}
+.tabs button{display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:transparent;color:var(--muted);padding:6px 2px;border-radius:8px;font-size:11px;font-weight:600}
+.tabs button[aria-selected="true"]{color:var(--accent)}
+.tabs svg{width:22px;height:22px}
+
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:13px;font-weight:500;z-index:20;max-width:calc(100% - 32px)}
+.empty-state{text-align:center;padding:28px 12px;color:var(--muted);display:flex;flex-direction:column;gap:10px;align-items:center}
+@media (prefers-reduced-motion:no-preference){.view{animation:in .18s ease-out}}
+@keyframes in{from{opacity:.4;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* Estado en varias líneas, intentos de prueba, inclinómetro */
+.status{border-radius:14px;line-height:1.35;padding:5px 12px}
+.atts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.att{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+.att[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.att:disabled{opacity:.7;cursor:default}
+.att .tv{font-family:var(--font-data);font-variant-numeric:tabular-nums;font-size:18px;font-weight:500}
+.att .tv.empty{color:var(--muted)}
+.reads{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.reads .num{font-family:var(--font-display);font-size:56px;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.sub-actions{display:flex;gap:10px;flex-wrap:wrap}
+[hidden]{display:none!important}
+</style>
+<script src="pdf-lib.min.js"></script>
+<header class="top"><div class="wrap">
+  <div class="brand">
+    <svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M5 27 L27 27"/><path d="M5 27 L22 6"/><path d="M14 27 A9 9 0 0 0 11.6 20.6" stroke-width="2"/></svg>
+    <span class="wordmark">Arco</span>
+  </div>
+  <button class="chip-patient" id="chipPatient" type="button"><i></i><span id="chipName">Sin paciente</span></button>
+</div></header>
+
+<main class="wrap">
+
+<section class="view" id="v-pacientes" data-view="pacientes">
+  <div class="view-head"><span class="eyebrow">Fichas</span><h2>Pacientes</h2><p>Elige un paciente para guardar sus mediciones, o crea uno nuevo.</p></div>
+  <div class="plist" id="pList"></div>
+  <form class="card stack" id="pForm" autocomplete="off">
+    <h3>Nuevo paciente</h3>
+    <label class="f" for="pfName">Nombre<input type="text" id="pfName" required placeholder="Nombre y apellido"></label>
+    <div class="grid2">
+      <label class="f" for="pfAge">Edad<input type="number" id="pfAge" min="1" max="110" inputmode="numeric" placeholder="años"></label>
+      <label class="f" for="pfSex">Sexo<select id="pfSex"><option value="">Sin indicar</option><option value="F">Femenino</option><option value="M">Masculino</option></select></label>
+    </div>
+    <label class="f" for="pfDx">Motivo de consulta<input type="text" id="pfDx" placeholder="Ej.: post operatorio LCA rodilla izquierda"></label>
+    <label class="check" for="pfConsent"><input type="checkbox" id="pfConsent"><span>El paciente dio su consentimiento informado para registrar sus datos y mediciones.</span></label>
+    <div class="row"><button class="btn primary" type="submit">Guardar paciente</button></div>
+  </form>
+  <p class="notice small" id="storeNote">Los datos quedan solo en este dispositivo. Las fotos y videos se usan para medir y no se guardan.</p>
+  <div class="card stack">
+    <h3>Respaldo</h3>
+    <p class="small muted">Guarda una copia de todas las fichas en un archivo para pasarlas a otro dispositivo o recuperarlas si el navegador borra los datos del sitio. El archivo contiene datos de pacientes: guárdalo en un lugar seguro.</p>
+    <div class="row">
+      <button class="btn" id="bkSave" type="button">Descargar respaldo</button>
+      <button class="btn" id="bkLoad" type="button">Restaurar respaldo</button>
+    </div>
+    <input type="file" id="bkIn" accept=".json,application/json" hidden>
+  </div>
+</section>
+
+<section class="view" id="v-medir" data-view="medir" hidden>
+  <div class="view-head"><span class="eyebrow">Goniometría</span><h2>Medir rango articular</h2><p>Mide con una foto o un fotograma de video, o usa el celular como inclinómetro.</p></div>
+  <div class="seg" id="srcSeg"></div>
+  <div class="split">
+    <div id="gImgPane">
+      <div class="stage"><canvas id="gCanvas" width="800" height="600" aria-label="Imagen para medir ángulos"></canvas></div>
+      <div class="vidbar" id="gVid" hidden>
+        <input type="range" id="gVidRange" min="0" max="1000" value="0" aria-label="Posición del video">
+        <div class="row">
+          <button class="btn sm" id="gPrev" type="button">&minus; fotograma</button>
+          <button class="btn sm" id="gNext" type="button">+ fotograma</button>
+          <button class="btn sm primary" id="gUse" type="button">Usar este fotograma</button>
+          <span class="small muted mono" id="gTime"></span>
+        </div>
+      </div>
+      <div class="stage-bar">
+        <span class="step" id="gStep"></span>
+        <div class="row">
+          <button class="btn sm" id="gLoad" type="button">Foto o video</button>
+          <button class="btn sm ghost" id="gReset" type="button">Reiniciar puntos</button>
+        </div>
+      </div>
+      <input type="file" id="gIn" accept="image/*,video/*" hidden>
+    </div>
+    <div class="card stack" id="gSensPane" hidden>
+      <div class="stack" style="gap:5px"><span class="eyebrow">Ángulo respecto a</span><div class="seg" id="sModeSeg"></div></div>
+      <div class="reads">
+        <div><span class="eyebrow">Ahora</span><div class="num" id="sNow">–</div></div>
+        <div><span class="eyebrow">Máximo</span><div class="num" id="sMax">–</div></div>
+      </div>
+      <div class="sub-actions">
+        <button class="btn primary" id="sStart" type="button">Iniciar sensor</button>
+        <button class="btn" id="sZero" type="button" disabled>Marcar cero</button>
+        <button class="btn ghost" id="sReset" type="button" disabled>Reiniciar máximo</button>
+      </div>
+      <p class="hint" id="sMsg"></p>
+      <label class="f" for="sManual">O escribe el valor que leíste en tu goniómetro (°)<input type="number" id="sManual" min="0" max="200" step="1" inputmode="decimal" placeholder="Ej.: 95"></label>
+    </div>
+    <div class="stack">
+      <div class="card stack">
+        <div class="grid2">
+          <label class="f" for="jt">Articulación<select id="jt"></select></label>
+          <label class="f" for="mv">Movimiento<select id="mv"></select></label>
+        </div>
+        <div class="grid2">
+          <div class="stack" style="gap:5px;grid-column:1 / -1"><span class="eyebrow">Lado</span><div class="seg" id="sideSeg"></div></div>
+          <div class="stack" id="methBox" style="gap:5px"><span class="eyebrow">Método</span><div class="seg" id="methSeg"></div></div>
+        </div>
+        <p class="hint" id="gHint"></p>
+      </div>
+      <div class="card readout">
+        <span class="eyebrow" id="gLabel">Resultado</span>
+        <div class="big" id="gBig">&ndash;</div>
+        <span class="status none" id="gStatus">Marca los puntos</span>
+        <div class="rangebar" aria-hidden="true"><i id="gBar" style="width:0"></i></div>
+        <div class="rangeref"><span>0°</span><span id="gRef"></span></div>
+        <label class="f" for="gNote" style="margin-top:6px">Nota<textarea id="gNote" placeholder="Dolor, fin de rango, calidad del movimiento…"></textarea></label>
+        <div class="row"><button class="btn primary" id="gSave" type="button">Guardar medición</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="view" id="v-postura" data-view="postura" hidden>
+  <div class="view-head"><span class="eyebrow">Postura</span><h2>Análisis postural</h2><p>Marca puntos anatómicos sobre una foto y revisa desniveles y desviaciones respecto a la plomada.</p></div>
+  <div class="split">
+    <div>
+      <div class="stage"><canvas id="pCanvas" width="800" height="600" aria-label="Foto para análisis postural"></canvas></div>
+      <div class="vidbar" id="pVid" hidden>
+        <input type="range" id="pVidRange" min="0" max="1000" value="0" aria-label="Posición del video">
+        <div class="row">
+          <button class="btn sm" id="pPrev" type="button">&minus; fotograma</button>
+          <button class="btn sm" id="pNext" type="button">+ fotograma</button>
+          <button class="btn sm primary" id="pUse" type="button">Usar este fotograma</button>
+        </div>
+      </div>
+      <div class="stage-bar">
+        <span class="step" id="pStep"></span>
+        <div class="row">
+          <button class="btn sm" id="pLoad" type="button">Foto o video</button>
+          <button class="btn sm ghost" id="pReset" type="button">Reiniciar puntos</button>
+        </div>
+      </div>
+      <input type="file" id="pIn" accept="image/*,video/*" hidden>
+    </div>
+    <div class="stack">
+      <div class="card stack">
+        <div class="stack" style="gap:5px"><span class="eyebrow">Vista</span><div class="seg" id="planeSeg"></div></div>
+        <div class="stack" id="faceBox" style="gap:5px"><span class="eyebrow">El paciente mira hacia</span><div class="seg" id="faceSeg"></div></div>
+        <p class="hint" id="pHint"></p>
+      </div>
+      <div class="card stack">
+        <span class="eyebrow">Resultados</span>
+        <div class="scroll-x" id="pRes"></div>
+        <label class="f" for="pLen" id="lenBox">Largo real trago a maléolo, en cm (opcional)<input type="number" id="pLen" min="50" max="250" inputmode="decimal" placeholder="Para ver desviaciones en cm"></label>
+        <label class="f" for="pNote">Nota<textarea id="pNote" placeholder="Observaciones posturales…"></textarea></label>
+        <div class="row"><button class="btn primary" id="pSave" type="button">Guardar análisis</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="view" id="v-pruebas" data-view="pruebas" hidden>
+  <div class="view-head"><span class="eyebrow">Evaluación funcional</span><h2>Pruebas funcionales</h2><p>Cronometra la prueba y compara con valores de referencia orientativos.</p></div>
+  <div class="seg" id="tSeg"></div>
+  <div class="card stack" id="tPanel"></div>
+  <div class="card stack" id="tRisk" hidden></div>
+</section>
+
+<section class="view" id="v-historial" data-view="historial" hidden>
+  <div class="view-head"><span class="eyebrow">Evolución</span><h2 id="hTitle">Historial</h2><p id="hSub"></p></div>
+  <div class="seg" id="hFilter"></div>
+  <div class="card" id="hEvoCard"><div id="hEvo"></div></div>
+  <div class="card" id="hListCard"><div id="hList"></div></div>
+  <div class="row">
+    <button class="btn primary" id="hPdf" type="button">Informe PDF</button>
+    <button class="btn" id="hCsv" type="button">Descargar CSV</button>
+    <button class="btn" id="hCopy" type="button">Copiar resumen</button>
+  </div>
+</section>
+
+</main>
+
+<nav class="tabs" aria-label="Secciones"><div class="wrap" id="tabs" role="tablist"></div></nav>
+<div class="toast" id="toast" hidden role="status"></div>
+<script>
+(function(){
+'use strict';
+/* ---------- utilidades ---------- */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-4);
+const fmtDate=ts=>new Date(ts).toLocaleDateString('es-CL',{day:'2-digit',month:'short',year:'numeric'});
+const r1=n=>Math.round(n*10)/10;
+const num=n=>String(r1(n)).replace('.',',');
+const t1=n=>(Math.round(n*10)/10).toFixed(1).replace('.',',');
+const DEG=Math.PI/180;
+const hooks={};              // onShow por vista
+let toastT=0;
+function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>{t.hidden=true},2600);}
+function seg(el,items,value,onPick){
+  el.innerHTML=items.map(([v,l])=>'<button type="button" data-v="'+esc(v)+'" aria-pressed="'+(String(v)===String(value))+'">'+esc(l)+'</button>').join('');
+  el.onclick=e=>{const b=e.target.closest('button');if(!b)return;$$('button',el).forEach(x=>x.setAttribute('aria-pressed',x===b));onPick(b.dataset.v);};
+}
+
+/* ---------- almacenamiento (solo este dispositivo) ---------- */
+const KEY='arco.v1';
+const DB={patients:[],records:[],pid:null};
+let storeOK=true;
+function loadDB(){try{const r=localStorage.getItem(KEY);if(r){Object.assign(DB,JSON.parse(r));return true;}}catch(e){storeOK=false;}return false;}
+function saveDB(){try{localStorage.setItem(KEY,JSON.stringify(DB));storeOK=true;}catch(e){storeOK=false;}updateStoreNote();}
+function updateStoreNote(){
+  $('#storeNote').textContent=storeOK
+    ?'Los datos quedan solo en este dispositivo. Las fotos y videos se usan para medir y no se guardan.'
+    :'Este navegador no permite guardar datos. Lo que registres se mantiene mientras la página siga abierta; descarga el CSV antes de salir.';
+}
+function seed(){
+  const now=Date.now(),D=86400000,pid='ejemplo1';
+  DB.patients=[{id:pid,name:'Paciente de ejemplo',age:68,sex:'F',dx:'Artroplastia total de rodilla derecha, 6 semanas',consent:true,example:true,created:now-30*D}];
+  const rom=(ts,v,note)=>({id:uid(),pid,ts,kind:'rom',key:'rodilla_flex_D',label:'Rodilla · Flexión',side:'D',value:v,unit:'°',ref:135,note:note||''});
+  DB.records=[
+    rom(now-28*D,78,'Dolor al final del rango'),rom(now-14*D,92),rom(now-2*D,104,'Mejor tolerancia'),
+    {id:uid(),pid,ts:now-28*D,kind:'prueba',key:'tug',label:'Timed Up and Go',side:'',value:16.4,unit:'s',text:'Intentos: 17,0 / 16,4 / 16,8 s',note:'Con bastón'},
+    {id:uid(),pid,ts:now-2*D,kind:'prueba',key:'tug',label:'Timed Up and Go',side:'',value:12.1,unit:'s',text:'Intentos: 12,6 / 12,1 / 12,3 s',note:'Sin bastón'},
+    {id:uid(),pid,ts:now-2*D,kind:'prueba',key:'chair30',label:'Sentarse y pararse 30 s',side:'',value:9,unit:'rep',note:''}
+  ];
+  DB.pid=pid;
+}
+function patient(){return DB.patients.find(p=>p.id===DB.pid)||null;}
+function needPatient(){
+  if(patient())return true;
+  toast('Selecciona o crea un paciente para guardar');
+  showView('pacientes');return false;
+}
+function addRecord(r){r.id=uid();r.pid=DB.pid;r.ts=Date.now();DB.records.push(r);saveDB();toast('Guardado en la ficha de '+patient().name.split(' ')[0]);}
+
+/* ---------- navegación ---------- */
+const ICONS={
+  pacientes:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 5.5a3 3 0 0 1 0 5.8M18.5 20c0-2.4-1-4.4-2.8-5.4"/>',
+  medir:'<path d="M4 20h16"/><path d="M4 20 16 5"/><path d="M11 20a7 7 0 0 0-1.8-4.7"/>',
+  postura:'<circle cx="12" cy="5" r="2.2"/><path d="M12 8v7M8 10h8M12 15l-3 6M12 15l3 6"/>',
+  pruebas:'<circle cx="12" cy="13.5" r="7"/><path d="M12 13.5V9.5M9.5 3h5"/>',
+  historial:'<path d="M4 20V4M4 20h16"/><path d="M8 15l4-4 3 3 5-6"/>'
+};
+const TABS=[['pacientes','Pacientes'],['medir','Medir'],['postura','Postura'],['pruebas','Pruebas'],['historial','Historial']];
+let current='pacientes';
+function buildTabs(){
+  $('#tabs').innerHTML=TABS.map(([id,l])=>'<button type="button" role="tab" data-id="'+id+'" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+ICONS[id]+'</svg>'+l+'</button>').join('');
+  $('#tabs').onclick=e=>{const b=e.target.closest('button');if(b)showView(b.dataset.id);};
+}
+function showView(id){
+  if(current==='pruebas'&&id!=='pruebas'&&hooks.leavePruebas)hooks.leavePruebas();
+  if(current==='medir'&&id!=='medir'&&hooks.leaveMedir)hooks.leaveMedir();
+  current=id;
+  $$('[data-view]').forEach(s=>{s.hidden=s.dataset.view!==id;});
+  $$('#tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.id===id));
+  window.scrollTo(0,0);
+  if(hooks[id])hooks[id]();
+}
+
+/* ---------- pacientes ---------- */
+function updateChip(){
+  const p=patient();
+  $('#chipName').textContent=p?p.name:'Sin paciente';
+  $('#chipPatient').classList.toggle('on',!!p);
+  if(hooks.resetTests)hooks.resetTests();
+}
+let delArm=0;
+function renderPatients(){
+  const list=$('#pList');
+  if(!DB.patients.length){
+    list.innerHTML='<div class="card flat empty-state"><p>Aún no tienes pacientes.</p><p class="small">Crea el primero con el formulario de abajo.</p></div>';return;
+  }
+  list.innerHTML=DB.patients.map(p=>{
+    const n=DB.records.filter(r=>r.pid===p.id).length;
+    const meta=[p.age?p.age+' años':'',p.sex==='F'?'Femenino':p.sex==='M'?'Masculino':'',n+(n===1?' registro':' registros')].filter(Boolean).join(' · ');
+    return '<button type="button" class="pitem" data-id="'+p.id+'" aria-current="'+(p.id===DB.pid)+'"><span style="min-width:0"><div class="nm">'+esc(p.name)+'</div><div class="meta">'+esc(meta)+(p.dx?' · '+esc(p.dx):'')+'</div></span>'+(p.example?'<span class="tag ex">Ejemplo</span>':'')+'</button>';
+  }).join('')+(patient()?'<div class="row"><button type="button" class="btn sm danger" id="pDel">Eliminar paciente seleccionado</button></div>':'');
+}
+function initPatients(){
+  $('#pList').onclick=e=>{
+    const it=e.target.closest('.pitem');
+    if(it){DB.pid=it.dataset.id;saveDB();updateChip();renderPatients();toast('Paciente: '+patient().name);return;}
+    const d=e.target.closest('#pDel');
+    if(d){
+      if(Date.now()-delArm<4000){
+        const id=DB.pid;DB.patients=DB.patients.filter(p=>p.id!==id);DB.records=DB.records.filter(r=>r.pid!==id);
+        DB.pid=DB.patients.length?DB.patients[0].id:null;saveDB();updateChip();renderPatients();toast('Paciente eliminado');delArm=0;
+      }else{delArm=Date.now();d.textContent='Toca de nuevo para confirmar';}
+    }
+  };
+  $('#pForm').onsubmit=e=>{
+    e.preventDefault();
+    const name=$('#pfName').value.trim();
+    if(!name){$('#pfName').focus();return;}
+    if(!$('#pfConsent').checked){toast('Registra el consentimiento informado para continuar');$('#pfConsent').focus();return;}
+    const p={id:uid(),name,age:parseInt($('#pfAge').value,10)||null,sex:$('#pfSex').value,dx:$('#pfDx').value.trim(),consent:true,created:Date.now()};
+    DB.patients.push(p);DB.pid=p.id;saveDB();updateChip();renderPatients();$('#pForm').reset();toast('Paciente creado');
+  };
+  $('#chipPatient').onclick=()=>showView('pacientes');
+  hooks.pacientes=renderPatients;
+}
+
+/* ---------- lienzo con puntos arrastrables ---------- */
+const SIGNAL='#E4572E';
+function rr(ctx,x,y,w,h,r){ctx.beginPath();if(ctx.roundRect){ctx.roundRect(x,y,w,h,r);}else{ctx.rect(x,y,w,h);}}
+function Stage(canvas){
+  const ctx=canvas.getContext('2d');
+  const st={src:null,W:canvas.width,H:canvas.height,pts:[],labels:[],drag:-1,grab:{x:0,y:0},sample:false,draw:null,onChange:function(){}};
+  const kk=()=>canvas.width/Math.max(1,canvas.getBoundingClientRect().width);
+  function pos(e){const b=canvas.getBoundingClientRect();return{x:(e.clientX-b.left)*canvas.width/b.width,y:(e.clientY-b.top)*canvas.height/b.height};}
+  function handle(p,i,k){
+    ctx.save();
+    ctx.lineWidth=3*k;ctx.strokeStyle='#fff';ctx.beginPath();ctx.arc(p.x,p.y,9*k,0,Math.PI*2);ctx.stroke();
+    ctx.lineWidth=2*k;ctx.strokeStyle=SIGNAL;ctx.beginPath();ctx.arc(p.x,p.y,9*k,0,Math.PI*2);ctx.stroke();
+    ctx.fillStyle=SIGNAL;ctx.beginPath();ctx.arc(p.x,p.y,2.5*k,0,Math.PI*2);ctx.fill();
+    const t=st.labels[i]||'';
+    if(t){
+      ctx.font='600 '+(12*k)+'px "Public Sans",system-ui,sans-serif';
+      const w=ctx.measureText(t).width+12*k,h=19*k;
+      let x=p.x+13*k,y=p.y-h-8*k;
+      if(x+w>canvas.width-2*k)x=p.x-13*k-w;
+      if(y<2*k)y=p.y+10*k;
+      ctx.fillStyle='rgba(18,35,43,.88)';rr(ctx,x,y,w,h,5*k);ctx.fill();
+      ctx.fillStyle='#fff';ctx.textBaseline='middle';ctx.fillText(t,x+6*k,y+h/2+.5*k);
+    }
+    ctx.restore();
+  }
+  function loupe(k){
+    const p=st.pts[st.drag];if(!p||!st.src)return;
+    const R=56*k,z=3;let cx=p.x,cy=p.y-100*k;
+    if(cy-R<4*k)cy=p.y+100*k;
+    cx=Math.min(canvas.width-R-4*k,Math.max(R+4*k,cx));
+    ctx.save();ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.clip();
+    ctx.fillStyle='#fff';ctx.fillRect(cx-R,cy-R,2*R,2*R);
+    try{ctx.drawImage(st.src,p.x-R/z,p.y-R/z,2*R/z,2*R/z,cx-R,cy-R,2*R,2*R);}catch(e){}
+    ctx.restore();
+    ctx.save();ctx.lineWidth=1.2*k;ctx.strokeStyle=SIGNAL;
+    ctx.beginPath();ctx.moveTo(cx-R*.55,cy);ctx.lineTo(cx+R*.55,cy);ctx.moveTo(cx,cy-R*.55);ctx.lineTo(cx,cy+R*.55);ctx.stroke();
+    ctx.lineWidth=3*k;ctx.strokeStyle='#fff';ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.stroke();
+    ctx.restore();
+  }
+  function render(){
+    const k=kk();
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    if(st.src)ctx.drawImage(st.src,0,0,canvas.width,canvas.height);
+    if(st.draw)st.draw(ctx,k,st.pts);
+    st.pts.forEach((p,i)=>handle(p,i,k));
+    if(st.drag>=0)loupe(k);
+  }
+  st.render=render;
+  st.setSource=function(src,w,h,isSample){st.src=src;st.W=w;st.H=h;canvas.width=w;canvas.height=h;st.sample=!!isSample;render();st.onChange();};
+  st.setLabels=function(l){st.labels=l;if(st.pts.length>l.length)st.pts.length=l.length;render();st.onChange();};
+  st.setPoints=function(a){st.pts=a.map(p=>({x:p[0],y:p[1]}));render();st.onChange();};
+  st.reset=function(){st.pts=[];st.drag=-1;render();st.onChange();};
+  canvas.addEventListener('pointerdown',e=>{
+    e.preventDefault();
+    const m=pos(e),k=kk();let best=-1,bd=30*k;
+    st.pts.forEach((p,i)=>{const d=Math.hypot(p.x-m.x,p.y-m.y);if(d<bd){bd=d;best=i;}});
+    if(best>=0){st.drag=best;st.grab={x:st.pts[best].x-m.x,y:st.pts[best].y-m.y};}
+    else if(st.pts.length<st.labels.length){st.pts.push({x:m.x,y:m.y});st.drag=st.pts.length-1;st.grab={x:0,y:0};}
+    else return;
+    try{canvas.setPointerCapture(e.pointerId);}catch(x){}
+    render();st.onChange();
+  });
+  canvas.addEventListener('pointermove',e=>{
+    if(st.drag<0)return;e.preventDefault();
+    const m=pos(e),p=st.pts[st.drag];
+    p.x=Math.min(canvas.width,Math.max(0,m.x+st.grab.x));p.y=Math.min(canvas.height,Math.max(0,m.y+st.grab.y));
+    render();st.onChange();
+  });
+  const end=()=>{if(st.drag>=0){st.drag=-1;render();st.onChange();}};
+  canvas.addEventListener('pointerup',end);
+  canvas.addEventListener('pointercancel',end);
+  window.addEventListener('resize',()=>render());
+  return st;
+}
+
+/* ---------- imágenes de ejemplo (dibujadas, no son fotos) ---------- */
+function sampleBase(){
+  const c=document.createElement('canvas');c.width=800;c.height=600;const x=c.getContext('2d');
+  const g=x.createLinearGradient(0,0,0,600);g.addColorStop(0,'#E7EEF1');g.addColorStop(1,'#C5D3D8');x.fillStyle=g;x.fillRect(0,0,800,600);
+  x.strokeStyle='rgba(255,255,255,.55)';x.lineWidth=1;
+  for(let i=50;i<800;i+=50){x.beginPath();x.moveTo(i,0);x.lineTo(i,600);x.stroke();}
+  for(let j=50;j<600;j+=50){x.beginPath();x.moveTo(0,j);x.lineTo(800,j);x.stroke();}
+  return {c,x};
+}
+function limb(x,a,b,w,col){x.strokeStyle=col;x.lineWidth=w;x.lineCap='round';x.beginPath();x.moveTo(a[0],a[1]);x.lineTo(b[0],b[1]);x.stroke();}
+function sampleTag(x){x.font='500 15px "IBM Plex Mono",monospace';x.fillStyle='rgba(18,35,43,.55)';x.textBaseline='alphabetic';x.fillText('Imagen de ejemplo',18,582);}
+const SAMPLE_KNEE=[[260,70],[430,290],[331,530]];
+function makeKnee(){
+  const {c,x}=sampleBase(),p=SAMPLE_KNEE;
+  limb(x,p[0],p[1],58,'#8FA7B1');limb(x,p[1],p[2],44,'#9DB3BC');limb(x,p[2],[420,548],26,'#8FA7B1');
+  x.fillStyle='#5E7983';p.forEach(q=>{x.beginPath();x.arc(q[0],q[1],9,0,7);x.fill();});
+  sampleTag(x);return c;
+}
+const SAMPLE_LAT=[[448,78],[418,168],[404,318],[414,438],[402,556]];
+function makeLateral(){
+  const {c,x}=sampleBase(),p=SAMPLE_LAT;
+  x.fillStyle='#9DB3BC';x.beginPath();x.arc(438,72,40,0,7);x.fill();
+  limb(x,[416,150],[404,318],84,'#8FA7B1');limb(x,p[2],p[3],58,'#9DB3BC');limb(x,p[3],p[4],42,'#8FA7B1');limb(x,p[4],[470,568],24,'#9DB3BC');
+  sampleTag(x);return c;
+}
+const SAMPLE_FRONT=[[352,88],[448,84],[300,172],[500,160],[345,330],[455,324]];
+function makeFrontal(){
+  const {c,x}=sampleBase();
+  x.fillStyle='#9DB3BC';x.beginPath();x.ellipse(400,84,44,54,0,0,7);x.fill();
+  x.fillStyle='#8FA7B1';x.beginPath();x.moveTo(290,170);x.lineTo(510,158);x.lineTo(470,340);x.lineTo(330,346);x.closePath();x.fill();
+  limb(x,[365,346],[355,560],56,'#9DB3BC');limb(x,[445,342],[450,560],56,'#9DB3BC');
+  sampleTag(x);return c;
+}
+
+/* ---------- carga de foto o video (con selector de fotograma) ---------- */
+function Media(stage,ui){
+  let url=null,vid=null,first=false;
+  const frame=document.createElement('canvas');
+  function setFrom(el,w,h){
+    const s=Math.min(1,1600/Math.max(w,h)),cw=Math.round(w*s),ch=Math.round(h*s);
+    frame.width=cw;frame.height=ch;frame.getContext('2d').drawImage(el,0,0,cw,ch);
+    stage.setSource(frame,cw,ch,false);
+  }
+  function cleanup(){if(url){URL.revokeObjectURL(url);url=null;}vid=null;ui.vid.hidden=true;}
+  function seek(t){if(!vid)return;const d=vid.duration||0;vid.currentTime=Math.min(Math.max(0,t),d);}
+  function time(){if(!vid||!ui.time)return;const t=vid.currentTime||0;ui.time.textContent=Math.floor(t/60)+':'+(t%60).toFixed(2).padStart(5,'0');}
+  ui.btn.onclick=()=>ui.input.click();
+  ui.input.onchange=()=>{
+    const f=ui.input.files&&ui.input.files[0];if(!f)return;
+    cleanup();url=URL.createObjectURL(f);
+    if(f.type.indexOf('video/')===0){
+      const v=document.createElement('video');vid=v;v.muted=true;v.playsInline=true;v.preload='auto';first=true;
+      v.onerror=()=>{toast('No se pudo abrir el video. Usa una foto o una captura de pantalla.');cleanup();};
+      v.onloadedmetadata=()=>{ui.vid.hidden=false;ui.range.value=0;seek(0.01);};
+      v.onseeked=()=>{if(vid!==v||!v.videoWidth)return;setFrom(v,v.videoWidth,v.videoHeight);if(first){stage.reset();first=false;}time();};
+      v.src=url;
+    }else{
+      const img=new Image();
+      img.onload=()=>{setFrom(img,img.naturalWidth,img.naturalHeight);stage.reset();if(ui.onNew)ui.onNew();};
+      img.onerror=()=>toast('No se pudo abrir la imagen');
+      img.src=url;
+    }
+    ui.input.value='';
+  };
+  ui.range.oninput=()=>{if(vid)seek(ui.range.value/1000*(vid.duration||0));};
+  ui.prev.onclick=()=>{if(vid){seek(vid.currentTime-1/30);ui.range.value=Math.round(vid.currentTime/(vid.duration||1)*1000);}};
+  ui.next.onclick=()=>{if(vid){seek(vid.currentTime+1/30);ui.range.value=Math.round(vid.currentTime/(vid.duration||1)*1000);}};
+  ui.use.onclick=()=>{ui.vid.hidden=true;toast('Fotograma seleccionado');};
+  return {};
+}
+
+/* ---------- goniometría ---------- */
+/* f: d = ángulo, s = 180 - ángulo, a = 90 - ángulo, b = ángulo - 90. Referencias AAOS, orientativas. */
+const JOINTS=[
+ {id:'hombro',name:'Hombro',moves:[
+  {id:'flex',name:'Flexión',ref:180,f:'d',m:'3',hint:'Fulcro: acromion. Fijo: línea axilar media del tronco hacia la cadera. Móvil: epicóndilo lateral del húmero.'},
+  {id:'ext',name:'Extensión',ref:60,f:'d',m:'3',hint:'Fulcro: acromion. Fijo: línea axilar media hacia la cadera. Móvil: epicóndilo lateral del húmero.'},
+  {id:'abd',name:'Abducción',ref:180,f:'d',m:'3',hint:'Fulcro: acromion. Fijo: paralelo al esternón, hacia la pelvis. Móvil: línea media del húmero.'},
+  {id:'rint',name:'Rotación interna',ref:70,f:'d',m:'v',hint:'Codo a 90°. Origen: olécranon. Extremo: apófisis estiloides cubital. Se mide contra la vertical.'},
+  {id:'rext',name:'Rotación externa',ref:90,f:'d',m:'v',hint:'Codo a 90°. Origen: olécranon. Extremo: apófisis estiloides cubital. Se mide contra la vertical.'}]},
+ {id:'codo',name:'Codo',moves:[
+  {id:'flex',name:'Flexión',ref:150,f:'s',m:'3',hint:'Fulcro: epicóndilo lateral. Fijo: línea del húmero hacia el acromion. Móvil: apófisis estiloides radial.'},
+  {id:'pron',name:'Pronación',ref:80,f:'d',m:'v',hint:'Codo a 90° junto al tronco. Origen: cabeza del 3.er metacarpiano. Extremo: estiloides cubital.'},
+  {id:'sup',name:'Supinación',ref:80,f:'d',m:'v',hint:'Codo a 90° junto al tronco. Origen: cabeza del 3.er metacarpiano. Extremo: estiloides cubital.'}]},
+ {id:'cadera',name:'Cadera',moves:[
+  {id:'flex',name:'Flexión',ref:120,f:'s',m:'3',hint:'Fulcro: trocánter mayor. Fijo: línea axilar media del tronco. Móvil: cóndilo lateral del fémur.'},
+  {id:'ext',name:'Extensión',ref:30,f:'s',m:'3',hint:'Fulcro: trocánter mayor. Fijo: línea axilar media. Móvil: cóndilo lateral del fémur.'},
+  {id:'abd',name:'Abducción',ref:45,f:'a',m:'3',hint:'Fulcro: EIAS. Fijo: línea entre ambas EIAS. Móvil: línea media del fémur hacia la rótula. Usa «Invertir» si el signo sale al revés.'},
+  {id:'add',name:'Aducción',ref:30,f:'a',m:'3',hint:'Fulcro: EIAS. Fijo: línea entre ambas EIAS. Móvil: línea media del fémur hacia la rótula.'},
+  {id:'rint',name:'Rotación interna',ref:45,f:'d',m:'v',hint:'Cadera y rodilla a 90°. Origen: tuberosidad tibial. Extremo: maléolo medial. Contra la vertical.'},
+  {id:'rext',name:'Rotación externa',ref:45,f:'d',m:'v',hint:'Cadera y rodilla a 90°. Origen: tuberosidad tibial. Extremo: maléolo medial. Contra la vertical.'}]},
+ {id:'rodilla',name:'Rodilla',moves:[
+  {id:'flex',name:'Flexión',ref:135,f:'s',m:'3',hint:'Fulcro: cóndilo lateral del fémur. Fijo: trocánter mayor. Móvil: maléolo lateral.'},
+  {id:'ext',name:'Extensión (déficit)',ref:0,f:'s',m:'3',hint:'Fulcro: cóndilo lateral del fémur. Fijo: trocánter mayor. Móvil: maléolo lateral. 0° es extensión completa.'}]},
+ {id:'tobillo',name:'Tobillo',moves:[
+  {id:'dors',name:'Dorsiflexión',ref:20,f:'a',m:'3',hint:'Fulcro: maléolo lateral. Fijo: cabeza del peroné. Móvil: base del 5.º metatarsiano. Neutro: 90°.'},
+  {id:'plan',name:'Flexión plantar',ref:50,f:'b',m:'3',hint:'Fulcro: maléolo lateral. Fijo: cabeza del peroné. Móvil: base del 5.º metatarsiano. Neutro: 90°.'},
+  {id:'inv',name:'Inversión',ref:35,f:'s',m:'3',hint:'Vista posterior. Fulcro: punto medio entre maléolos. Fijo: línea media de la pierna. Móvil: línea media del calcáneo.'},
+  {id:'eve',name:'Eversión',ref:15,f:'s',m:'3',hint:'Vista posterior. Fulcro: punto medio entre maléolos. Fijo: línea media de la pierna. Móvil: línea media del calcáneo.'}]},
+ {id:'columna',name:'Columna',moves:[
+  {id:'cflex',name:'Cervical · Flexión',ref:45,f:'d',m:'v',hint:'Vista lateral. Origen: C7. Extremo: trago. Se mide contra la vertical.'},
+  {id:'cext',name:'Cervical · Extensión',ref:45,f:'d',m:'v',hint:'Vista lateral. Origen: C7. Extremo: trago. Se mide contra la vertical.'},
+  {id:'clat',name:'Cervical · Inclinación lateral',ref:45,f:'d',m:'v',hint:'Vista posterior. Origen: C7. Extremo: protuberancia occipital externa.'},
+  {id:'lflex',name:'Lumbar · Flexión',ref:60,f:'d',m:'v',hint:'Vista lateral. Origen: S2. Extremo: T12 o C7. Mide la inclinación del tronco contra la vertical.'},
+  {id:'lext',name:'Lumbar · Extensión',ref:25,f:'d',m:'v',hint:'Vista lateral. Origen: S2. Extremo: T12 o C7. Mide la inclinación del tronco contra la vertical.'},
+  {id:'llat',name:'Lumbar · Inclinación lateral',ref:25,f:'d',m:'v',hint:'Vista posterior. Origen: S2. Extremo: C7. Contra la vertical.'},
+  {id:'trot',name:'Tóraco-lumbar · Rotación',ref:45,f:'a',m:'3',hint:'Vista superior. Fijo: línea entre los acromiones en reposo. Fulcro: centro de la cabeza. Móvil: línea entre los acromiones al rotar.'}]}
+];
+const INV={d:'s',s:'d',a:'b',b:'a'};
+const G={j:'rodilla',m:'flex',side:'D',meth:'3',invert:false,src:'img'};
+let gStage,gMedia,gInvBtn;
+
+const jt=()=>JOINTS.find(j=>j.id===G.j);
+const mv=()=>jt().moves.find(m=>m.id===G.m);
+const sideWord=s=>s==='D'?'derecho':s==='I'?'izquierdo':'';
+function fKey(){const k=mv().f;return G.invert?INV[k]:k;}
+function angleAt(a,b,c){
+  const a0=Math.atan2(a.y-b.y,a.x-b.x),a1=Math.atan2(c.y-b.y,c.x-b.x);
+  let d=a1-a0;while(d>Math.PI)d-=2*Math.PI;while(d<=-Math.PI)d+=2*Math.PI;
+  return Math.abs(d)/DEG;
+}
+function acuteVs(a,b,axis){
+  const dx=b.x-a.x,dy=b.y-a.y;
+  return axis==='v'?Math.atan2(Math.abs(dx),Math.abs(dy))/DEG:Math.atan2(Math.abs(dy),Math.abs(dx))/DEG;
+}
+function gCalc(){
+  if(G.src==='sensor'){const sv=sVal();return sv==null?null:{interior:sv,value:sv};}
+  const p=gStage.pts;
+  if(G.meth==='3'){
+    if(p.length<3)return null;
+    const t=angleAt(p[0],p[1],p[2]),k=fKey();
+    return {interior:t,value:k==='d'?t:k==='s'?180-t:k==='a'?90-t:t-90};
+  }
+  if(p.length<2)return null;
+  const v=acuteVs(p[0],p[1],G.meth);
+  return {interior:v,value:v};
+}
+function haloLine(ctx,a,b,k,dash){
+  ctx.save();ctx.lineCap='round';
+  if(dash)ctx.setLineDash([9*k,7*k]);
+  ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=6*k;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+  ctx.strokeStyle=dash?'#12232B':SIGNAL;ctx.lineWidth=(dash?2:3)*k;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+  ctx.restore();
+}
+function arcLabel(ctx,c,a0,a1,k,text){
+  let d=a1-a0;while(d>Math.PI)d-=2*Math.PI;while(d<=-Math.PI)d+=2*Math.PI;
+  ctx.save();ctx.lineWidth=3*k;ctx.strokeStyle=SIGNAL;ctx.beginPath();ctx.arc(c.x,c.y,48*k,a0,a0+d,d<0);ctx.stroke();
+  const mid=a0+d/2,tx=c.x+Math.cos(mid)*78*k,ty=c.y+Math.sin(mid)*78*k;
+  ctx.font='600 '+(20*k)+'px "IBM Plex Mono",monospace';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.lineWidth=5*k;ctx.strokeStyle='rgba(255,255,255,.95)';ctx.strokeText(text,tx,ty);ctx.fillStyle='#12232B';ctx.fillText(text,tx,ty);
+  ctx.restore();
+}
+function gDraw(ctx,k,p){
+  const r=gCalc(),txt=r?Math.round(r.interior)+'°':'';
+  if(G.meth==='3'){
+    if(p.length>=2)haloLine(ctx,p[1],p[0],k);
+    if(p.length>=3){
+      haloLine(ctx,p[1],p[2],k);
+      arcLabel(ctx,p[1],Math.atan2(p[0].y-p[1].y,p[0].x-p[1].x),Math.atan2(p[2].y-p[1].y,p[2].x-p[1].x),k,txt);
+    }
+  }else if(p.length>=2){
+    const dx=p[1].x-p[0].x,dy=p[1].y-p[0].y,L=Math.max(120*k,Math.hypot(dx,dy));
+    let ref,a0;
+    if(G.meth==='v'){const s=dy<0?-1:1;ref={x:p[0].x,y:p[0].y+s*L};a0=s<0?-Math.PI/2:Math.PI/2;}
+    else{const s=dx<0?-1:1;ref={x:p[0].x+s*L,y:p[0].y};a0=s<0?Math.PI:0;}
+    haloLine(ctx,p[0],ref,k,true);haloLine(ctx,p[0],p[1],k);
+    arcLabel(ctx,p[0],a0,Math.atan2(dy,dx),k,txt);
+  }
+}
+function gLabels(){return G.meth==='3'?['Brazo fijo','Fulcro','Brazo móvil']:['Origen','Extremo'];}
+function gSync(){
+  const r=gCalc(),m=mv(),n=gStage.pts.length,L=gLabels();
+  const big=$('#gBig'),st=$('#gStatus'),bar=$('#gBar');
+  $('#gLabel').textContent=jt().name+' · '+m.name+(G.side?' '+sideWord(G.side):'');
+  $('#gRef').textContent=m.ref>0?'Ref. '+m.ref+'°':'Meta 0°';
+  if(n<L.length){$('#gStep').innerHTML='Toca la imagen para marcar: <b>'+esc(L[n])+'</b> ('+(n+1)+' de '+L.length+')';}
+  else{$('#gStep').textContent='Arrastra los puntos para ajustar. La lupa ayuda a afinar.';}
+  gInvBtn.hidden=G.src!=='img'||G.meth!=='3'||!(m.f in INV);
+  gInvBtn.textContent=G.invert?'Usando el ángulo complementario':'Invertir ángulo';
+  if(!r){big.className='big empty';big.innerHTML='&ndash;';st.className='status none';st.textContent='Marca los puntos';bar.style.width='0';return;}
+  const v=Math.round(r.value);
+  big.className='big';big.innerHTML=v+'<sup>°</sup>';
+  let cls,txt;
+  if(m.ref>0){
+    const pc=Math.round(v/m.ref*100);
+    cls=pc>=90?'ok':pc>=70?'warn':'crit';
+    txt=pc>=100?'Alcanza la referencia':pc>=90?'Dentro de lo esperado ('+pc+'%)':pc>=70?'Algo reducido ('+pc+'% de la referencia)':'Reducido ('+Math.max(0,pc)+'% de la referencia)';
+    bar.style.width=Math.max(0,Math.min(100,pc))+'%';
+  }else{
+    cls=v<=5?'ok':v<=10?'warn':'crit';
+    txt=v<=5?'Extensión completa o casi':'Déficit de extensión de '+v+'°';
+    bar.style.width=Math.max(0,Math.min(100,v/30*100))+'%';
+  }
+  st.className='status '+cls;st.textContent=txt;
+}
+function gMoveChanged(){
+  G.meth=mv().m;G.invert=false;
+  seg($('#methSeg'),[['3','3 puntos'],['v','Vertical'],['h','Horizontal']],G.meth,v=>{G.meth=v;G.invert=false;gStage.setLabels(gLabels());});
+  gHint();
+  gStage.setLabels(gLabels());
+}
+function gHint(){
+  let t;
+  if(G.src==='sensor'){
+    t=(G.j==='columna'&&G.m==='trot')
+      ?'Esta rotación ocurre en el plano horizontal y el sensor del celular no la detecta. Usa la imagen o escribe el valor de tu goniómetro.'
+      :'Apoya el celular sobre el segmento que se mueve, con el borde largo alineado al hueso y bien fijo. Mide el giro respecto de la posición inicial. Referencia AAOS, orientativa.';
+  }else t=mv().hint+' Referencia AAOS, orientativa.';
+  $('#gHint').textContent=t;
+}
+function gSetSrc(v){
+  G.src=v;
+  if(v!=='sensor'&&S.on)sStop();
+  $('#gImgPane').hidden=v!=='img';
+  $('#gSensPane').hidden=v!=='sensor';
+  $('#methBox').hidden=v!=='img';
+  gHint();
+  if(v==='img')gStage.render();
+  sRender();
+  gSync();
+}
+function gFillMoves(){
+  $('#mv').innerHTML=jt().moves.map(m=>'<option value="'+m.id+'">'+esc(m.name)+'</option>').join('');
+  $('#mv').value=G.m;
+}
+function gReset(){
+  if(gStage.sample&&G.meth==='3')gStage.setPoints(SAMPLE_KNEE);else gStage.reset();
+}
+function initGonio(){
+  gStage=Stage($('#gCanvas'));
+  gStage.draw=gDraw;gStage.onChange=gSync;
+  gInvBtn=document.createElement('button');gInvBtn.type='button';gInvBtn.className='btn sm ghost';gInvBtn.style.alignSelf='flex-start';
+  $('#gNote').closest('label').before(gInvBtn);
+  gInvBtn.onclick=()=>{G.invert=!G.invert;gSync();gStage.render();};
+  $('#jt').innerHTML=JOINTS.map(j=>'<option value="'+j.id+'">'+j.name+'</option>').join('');
+  $('#jt').value=G.j;
+  $('#jt').onchange=()=>{G.j=$('#jt').value;G.m=jt().moves[0].id;gFillMoves();gMoveChanged();};
+  $('#mv').onchange=()=>{G.m=$('#mv').value;gMoveChanged();};
+  seg($('#sideSeg'),[['D','Derecho'],['I','Izquierdo'],['','Sin lado']],G.side,v=>{G.side=v;gSync();});
+  gMedia=Media(gStage,{input:$('#gIn'),btn:$('#gLoad'),vid:$('#gVid'),range:$('#gVidRange'),prev:$('#gPrev'),next:$('#gNext'),use:$('#gUse'),time:$('#gTime')});
+  $('#gReset').onclick=gReset;
+  $('#gSave').onclick=()=>{
+    const r=gCalc();
+    if(!r){toast(G.src==='sensor'?'Aún no hay una medición para guardar':'Marca los puntos antes de guardar');return;}
+    if(!needPatient())return;
+    const m=mv();
+    addRecord({kind:'rom',key:G.j+'_'+G.m+'_'+G.side,label:jt().name+' · '+m.name,side:G.side,value:Math.round(r.value),unit:'°',ref:m.ref,note:$('#gNote').value.trim(),text:G.src==='sensor'?(S.manual!=null?'Valor manual':'Inclinómetro'):'Imagen',method:G.src==='sensor'?'sensor':G.meth});
+    if(S.manual!=null){S.manual=null;$('#sManual').value='';gSync();}
+    $('#gNote').value='';
+  };
+  gFillMoves();
+  gStage.setSource(makeKnee(),800,600,true);
+  gStage.setPoints(SAMPLE_KNEE);
+  gMoveChanged();
+  gStage.setPoints(SAMPLE_KNEE);
+  seg($('#srcSeg'),[['img','Imagen'],['sensor','Inclinómetro']],G.src,gSetSrc);
+  sInit();
+  hooks.medir=()=>{if(G.src==='img')gStage.render();};
+}
+
+/* ---------- inclinómetro (sensores del celular) ---------- */
+/* El ángulo es la separación entre el vector de gravedad actual y el de referencia (cero).
+   Mide giros en planos verticales; un giro alrededor del eje vertical no cambia la gravedad y no se detecta. */
+const IN_VIEWER=!!(window.claude&&window.claude.use);   /* vista dentro de Claude: el navegador bloquea los sensores */
+const S={on:false,got:false,v:null,zero:null,ang:0,max:0,mode:'zero',manual:null,g:0,timer:0,raf:0,wl:null,msg:''};
+const sDot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+function sUnit(x,y,z){const n=Math.hypot(x,y,z);return n?[x/n,y/n,z/n]:null;}
+function sAngle(v){
+  if(S.mode==='vertical')return Math.acos(Math.min(1,Math.abs(v[1])))/DEG;
+  if(!S.zero)return 0;
+  return Math.acos(Math.max(-1,Math.min(1,sDot(v,S.zero))))/DEG;
+}
+function sVal(){
+  if(S.manual!=null)return S.manual;
+  if(!S.got||(S.mode==='zero'&&!S.zero))return null;
+  return S.max;
+}
+function sOnMotion(e){
+  const a=e.accelerationIncludingGravity;
+  if(!a||a.x==null||a.y==null||a.z==null)return;
+  const n=Math.hypot(a.x,a.y,a.z);
+  if(!n)return;
+  const u=[a.x/n,a.y/n,a.z/n];
+  if(!S.got){S.got=true;clearTimeout(S.timer);S.g=n;S.v=u;S.msg='';}
+  else{
+    if(Math.abs(n-S.g)/S.g>0.12)return;           /* movimiento brusco: no es solo gravedad */
+    S.g+=(n-S.g)*0.02;
+    const k=0.25;
+    S.v=sUnit(S.v[0]+(u[0]-S.v[0])*k,S.v[1]+(u[1]-S.v[1])*k,S.v[2]+(u[2]-S.v[2])*k)||S.v;
+  }
+  S.ang=sAngle(S.v);
+  if(S.ang>S.max)S.max=S.ang;
+  sQueue();
+}
+function sQueue(){
+  if(S.raf)return;
+  S.raf=requestAnimationFrame(()=>{S.raf=0;sRender();gSync();});
+}
+function sMessage(){
+  if(S.msg)return S.msg;
+  if(!S.on&&S.got)return 'Sensor detenido. El valor máximo se conserva para guardarlo.';
+  if(!S.on&&IN_VIEWER)return 'Esta vista bloquea los sensores del celular. El inclinómetro funciona en la versión instalable de Arco. Mientras tanto, escribe abajo el valor de tu goniómetro.';
+  if(!S.on)return 'Toca «Iniciar sensor». Mide giros en planos verticales con una precisión de 1 a 3°. Los giros en plano horizontal no se detectan.';
+  if(!S.got)return 'Buscando el sensor…';
+  if(S.mode==='vertical')return 'Alinea el borde largo del celular con el segmento. El ángulo se mide contra la vertical.';
+  if(!S.zero)return 'Apoya el celular sobre el segmento en la posición inicial y toca «Marcar cero».';
+  return 'Lleva el segmento al final del rango. El valor más alto queda en Máximo.';
+}
+function sRender(){
+  const f=v=>Math.round(v)+'°';
+  const live=S.got&&(S.mode==='vertical'||!!S.zero);
+  $('#sNow').textContent=live?f(S.ang):'–';
+  $('#sMax').textContent=live?f(S.max):'–';
+  const b=$('#sStart');
+  b.textContent=S.on?'Detener sensor':'Iniciar sensor';
+  b.classList.toggle('primary',!S.on);
+  $('#sZero').disabled=!S.on||!S.got||S.mode==='vertical';
+  $('#sReset').disabled=!live;
+  $('#sMsg').textContent=sMessage();
+}
+function sStop(msg){
+  window.removeEventListener('devicemotion',sOnMotion);
+  clearTimeout(S.timer);
+  S.on=false;S.msg=msg||'';
+  try{if(S.wl){S.wl.release();S.wl=null;}}catch(e){}
+  sRender();gSync();
+}
+function sFail(why){
+  sStop(IN_VIEWER
+    ?'Esta vista bloquea los sensores del celular. El inclinómetro funciona en la versión instalable de Arco. Mientras tanto, escribe abajo el valor de tu goniómetro.'
+    :why==='perm'
+      ?'El permiso del sensor fue rechazado. Actívalo en los ajustes del navegador e inténtalo de nuevo.'
+      :'No llegan datos del sensor. Este dispositivo o navegador no los entrega. Escribe el valor de tu goniómetro abajo o mide con la imagen.');
+  S.got=false;S.v=null;
+  sRender();gSync();
+}
+function sStart(){
+  if(S.on){sStop();return;}
+  const DM=window.DeviceMotionEvent;
+  if(!DM){sFail();return;}
+  const begin=()=>{
+    window.addEventListener('devicemotion',sOnMotion);
+    S.on=true;S.got=false;S.v=null;S.zero=null;S.ang=0;S.max=0;S.manual=null;S.msg='';
+    $('#sManual').value='';
+    clearTimeout(S.timer);
+    S.timer=setTimeout(()=>{if(S.on&&!S.got)sFail();},2000);
+    try{if(navigator.wakeLock)navigator.wakeLock.request('screen').then(l=>{S.wl=l;}).catch(()=>{});}catch(e){}
+    sRender();gSync();
+  };
+  if(typeof DM.requestPermission==='function'){
+    DM.requestPermission().then(r=>{if(r==='granted')begin();else sFail('perm');}).catch(()=>sFail());
+  }else begin();
+}
+function sInit(){
+  seg($('#sModeSeg'),[['zero','Desde el cero'],['vertical','Contra la vertical']],S.mode,v=>{
+    S.mode=v;S.manual=null;$('#sManual').value='';
+    S.max=S.got&&S.v?sAngle(S.v):0;S.ang=S.max;
+    sRender();gSync();
+  });
+  $('#sStart').onclick=sStart;
+  $('#sZero').onclick=()=>{
+    if(!S.got||!S.v)return;
+    S.zero=S.v.slice();S.ang=0;S.max=0;S.manual=null;$('#sManual').value='';
+    sRender();gSync();
+  };
+  $('#sReset').onclick=()=>{S.manual=null;$('#sManual').value='';S.max=S.got?S.ang:0;sRender();gSync();};
+  $('#sManual').oninput=()=>{
+    const n=parseFloat($('#sManual').value.replace(',','.'));
+    S.manual=(isFinite(n)&&n>=0&&n<=200)?n:null;
+    gSync();
+  };
+  hooks.leaveMedir=()=>{if(S.on)sStop();};
+  sRender();
+}
+
+/* ---------- postura ---------- */
+const P={plane:'lat',face:'R'};
+let pStage,pMedia;
+const P_LAB={
+  lat:['Trago','Acromion','Trocánter mayor','Rodilla','Maléolo lateral'],
+  front:['Trago D','Trago I','Acromion D','Acromion I','EIAS D','EIAS I']
+};
+const P_HINT={
+  lat:'Vista lateral, paciente de pie, cámara a la altura de la cadera y a 2 o 3 metros. La plomada pasa por el maléolo lateral. Si el paciente mira a la izquierda de la foto, indícalo arriba.',
+  front:'Vista anterior o posterior. Marca según el lado del paciente, no el de la imagen: en una foto de frente su derecha queda a la izquierda de la pantalla.'
+};
+function pPairs(){return [['Cabeza (tragos)',0,1,'D','I'],['Hombros (acromiones)',2,3,'D','I'],['Pelvis (EIAS)',4,5,'D','I']];}
+function tiltInfo(a,b){
+  const dx=Math.abs(b.x-a.x),dy=Math.abs(b.y-a.y);
+  const deg=Math.atan2(dy,Math.max(dx,1e-6))/DEG;
+  return {deg,higher:a.y<b.y?'D':'I'};
+}
+function pCalc(){
+  const p=pStage.pts,rows=[],sum=[];
+  if(P.plane==='front'){
+    pPairs().forEach(([n,i,j])=>{
+      if(p[i]&&p[j]){
+        const t=tiltInfo(p[i],p[j]);
+        const txt=t.deg<0.5?'Nivelado':num(t.deg)+'° · más alto: '+(t.higher==='D'?'derecho':'izquierdo');
+        rows.push([n,txt]);sum.push(n.split(' ')[0]+' '+(t.deg<0.5?'nivelado':num(t.deg)+'° (más alto '+t.higher+')'));
+      }
+    });
+  }else if(p[4]){
+    const len=parseFloat($('#pLen').value),refPx=p[0]?Math.abs(p[4].y-p[0].y):0,sg=P.face==='R'?1:-1;
+    const names=['Trago','Acromion','Trocánter mayor','Rodilla'];
+    for(let i=0;i<4;i++){
+      if(!p[i])continue;
+      const off=(p[i].x-p[4].x)*sg;
+      let txt,val;
+      if(refPx>10){
+        const pc=off/refPx*100;
+        val=len>0?off/refPx*len:pc;
+        const u=len>0?' cm':' %';
+        txt=Math.abs(val)<(len>0?0.3:0.5)?'En línea con la plomada':(val>0?'+':'−')+num(Math.abs(val))+u+(val>0?' anterior':' posterior');
+        sum.push(names[i].toLowerCase()+' '+(val>0?'+':'')+num(val)+u.trim());
+      }else{txt='Marca el trago para calcular';}
+      rows.push([names[i],txt]);
+    }
+    if(p[0]&&p[1]){
+      const a=acuteVs(p[1],p[0],'v'),fwd=((p[0].x-p[1].x)*sg)>0;
+      rows.push(['Acromion–trago vs vertical',num(a)+'° '+(fwd?'hacia adelante':'hacia atrás')]);
+      sum.push('acromion–trago '+num(a)+'° '+(fwd?'anterior':'posterior'));
+    }
+  }
+  return {rows,summary:sum.join('; ')};
+}
+function pDraw(ctx,k,p){
+  if(P.plane==='lat'){
+    if(p[4]){haloLine(ctx,{x:p[4].x,y:0},{x:p[4].x,y:ctx.canvas.height},k,true);}
+    for(let i=1;i<p.length;i++)haloLine(ctx,p[i-1],p[i],k);
+  }else{
+    pPairs().forEach(([n,i,j])=>{
+      if(!(p[i]&&p[j]))return;
+      haloLine(ctx,p[i],p[j],k);
+      haloLine(ctx,p[i],{x:p[j].x,y:p[i].y},k,true);
+      const t=tiltInfo(p[i],p[j]);
+      ctx.save();ctx.font='600 '+(17*k)+'px "IBM Plex Mono",monospace';ctx.textAlign='center';ctx.textBaseline='middle';
+      const mx=(p[i].x+p[j].x)/2,my=Math.min(p[i].y,p[j].y)-20*k;
+      ctx.lineWidth=5*k;ctx.strokeStyle='rgba(255,255,255,.95)';ctx.strokeText(num(t.deg)+'°',mx,my);ctx.fillStyle='#12232B';ctx.fillText(num(t.deg)+'°',mx,my);
+      ctx.restore();
+    });
+  }
+}
+function pSync(){
+  const L=P_LAB[P.plane],n=pStage.pts.length;
+  $('#pStep').innerHTML=n<L.length?'Toca la imagen para marcar: <b>'+esc(L[n])+'</b> ('+(n+1)+' de '+L.length+')':'Arrastra los puntos para ajustar.';
+  const r=pCalc();
+  $('#pRes').innerHTML=r.rows.length
+    ?'<table class="data"><thead><tr><th>Medida</th><th class="n">Resultado</th></tr></thead><tbody>'+r.rows.map(x=>'<tr><td>'+esc(x[0])+'</td><td class="n">'+esc(x[1])+'</td></tr>').join('')+'</tbody></table>'
+    :'<p class="small muted">Marca los puntos sobre la imagen para ver los resultados.</p>';
+}
+function pPlane(){
+  $('#pHint').textContent=P_HINT[P.plane];
+  $('#faceBox').hidden=P.plane!=='lat';
+  $('#lenBox').hidden=P.plane!=='lat';
+  pStage.setLabels(P_LAB[P.plane]);
+}
+function pLoadSample(){
+  if(P.plane==='lat'){pStage.setSource(makeLateral(),800,600,true);pStage.setPoints(SAMPLE_LAT);}
+  else{pStage.setSource(makeFrontal(),800,600,true);pStage.setPoints(SAMPLE_FRONT);}
+}
+function initPosture(){
+  pStage=Stage($('#pCanvas'));
+  pStage.draw=pDraw;pStage.onChange=pSync;
+  seg($('#planeSeg'),[['lat','Lateral'],['front','Frontal / posterior']],P.plane,v=>{
+    P.plane=v;pStage.pts=[];
+    if(pStage.sample)pLoadSample();
+    pPlane();pStage.render();pSync();
+  });
+  seg($('#faceSeg'),[['R','Derecha de la foto'],['L','Izquierda de la foto']],P.face,v=>{P.face=v;pSync();});
+  $('#pLen').oninput=pSync;
+  pMedia=Media(pStage,{input:$('#pIn'),btn:$('#pLoad'),vid:$('#pVid'),range:$('#pVidRange'),prev:$('#pPrev'),next:$('#pNext'),use:$('#pUse')});
+  $('#pReset').onclick=()=>{
+    if(pStage.sample){pStage.setPoints(P.plane==='lat'?SAMPLE_LAT:SAMPLE_FRONT);}else pStage.reset();
+  };
+  $('#pSave').onclick=()=>{
+    const r=pCalc();
+    if(!r.rows.length){toast('Marca los puntos antes de guardar');return;}
+    if(!needPatient())return;
+    addRecord({kind:'postura',key:'postura_'+P.plane,label:'Postura · '+(P.plane==='lat'?'vista lateral':'vista frontal'),side:'',value:null,unit:'',text:r.summary,note:$('#pNote').value.trim()});
+    $('#pNote').value='';
+  };
+  pStage.setSource(makeLateral(),800,600,true);
+  pPlane();
+  pStage.setPoints(SAMPLE_LAT);
+  hooks.postura=()=>pStage.render();
+}
+
+/* ---------- pruebas funcionales ---------- */
+const EMPAM='Clasificación según el Instructivo de Control de Salud EMPAM (MINSAL), páginas 9 y 10. Confirma con tu protocolo.';
+const TCFG={
+  romberg:{short:'Romberg',name:'Test de Romberg',
+    desc:['De pie con los pies juntos y los brazos a los costados.','Mide primero con ojos abiertos y luego con ojos cerrados, hasta 30 s.','Detén si pierde el equilibrio, mueve los pies o abre los ojos.'],
+    ref:'El Romberg se interpreta con el criterio clínico habitual. Confirma con tu protocolo.'},
+  stance:{short:'Unipodal',name:'Estación unipodal',
+    desc:['De pie, con los brazos cruzados sobre el tórax y las manos en los hombros.',
+      'Levanta una pierna hasta dejar cadera y rodilla a 90° y la mantiene el mayor tiempo posible. El tiempo parte cuando logra los 90°.',
+      'Se hacen 3 intentos con cada pierna y se registra el mejor tiempo. El cronómetro se detiene solo a los 30 s.',
+      'Es alterado si no logra la posición, busca apoyo, se desestabiliza o las piernas se tocan entre sí.',
+      'No se aplica a quien usa ayudas técnicas o tiene problemas evidentes de equilibrio. El evaluador demuestra la prueba y se ubica a un costado, atento a pérdidas de equilibrio.'],
+    ref:EMPAM},
+  tug:{short:'TUG',name:'Timed Up and Go',
+    desc:['Silla sin brazos y 3 m medidos desde las patas delanteras hasta un cono o una botella.',
+      'Parte sentado con la espalda apoyada, los brazos a los costados y los pies en el suelo.',
+      'Se pone de pie sin apoyarse, camina como lo hace habitualmente hasta el cono, vuelve y se sienta.',
+      'El tiempo parte cuando despega la espalda del respaldo y se detiene al retomar la posición inicial.',
+      'Se hacen 3 intentos y se registra el mejor tiempo.'],
+    ref:EMPAM},
+  chair:{short:'STS 30 s',name:'Sentarse y pararse en 30 s (STS30)',
+    desc:['Silla de 43 cm, brazos cruzados sobre el pecho.','Cuenta cada vez que queda completamente de pie en 30 segundos.'],
+    ref:'Referencia de repeticiones: CDC STEADI. Confirma con tu protocolo.'}
+};
+const T={id:'romberg',running:false,t0:0,elapsed:0,raf:0,done:false,count:0,side:'D',eyes:'open',sway:'',
+  att:[null,null,null],uni:{D:[null,null,null],I:[null,null,null]},cur:0,aid:false,rom:{open:null,closed:null},saved:{}};
+const CHAIR_F=[12,11,10,10,9,8,4],CHAIR_M=[14,12,12,11,10,8,7];
+function chairRef(){
+  const p=patient();if(!p||!p.age||!p.sex)return null;
+  const i=Math.floor((p.age-60)/5);if(i<0||i>6)return null;
+  return {min:(p.sex==='F'?CHAIR_F:CHAIR_M)[i],band:(60+i*5)+' a '+(64+i*5)};
+}
+const tCapped=()=>T.id==='chair'||T.id==='stance'||T.id==='romberg';
+const hasAtt=()=>T.id==='tug'||T.id==='stance';
+const attOf=()=>T.id==='tug'?T.att:T.uni[T.side];
+const bestOf=a=>{const v=a.filter(x=>x!=null);return v.length?Math.min.apply(null,a.filter(x=>x!=null)):null;};
+const bestTime=a=>{const v=a.filter(x=>x!=null);return v.length?Math.max.apply(null,v):null;};
+/* TUG: mejor = menor tiempo. Unipodal: mejor = mayor tiempo. */
+const tBest=()=>T.id==='tug'?bestOf(T.att):bestTime(T.uni[T.side]);
+function tClockText(){
+  if(T.id==='chair')return ((30000-T.elapsed)/1000).toFixed(1).replace('.',',')+' s';
+  return (T.elapsed/1000).toFixed(2).replace('.',',')+' s';
+}
+function uniClass(b){
+  if(b>=5)return {cls:'ok',txt:'Normal (5 s o más)',short:'normal',alt:false,ind:false};
+  if(b<4)return {cls:'crit',txt:'Alterado (menos de 4 s)',short:'alterado',alt:true,ind:false};
+  return {cls:'warn',txt:'Entre 4 y 5 s: el manual no lo clasifica',short:'sin clasificar (entre 4 y 5 s)',alt:false,ind:true};
+}
+function tugClass(b,aid){
+  if(aid)return {cls:'crit',txt:'Alto riesgo de caída (necesitó ayuda para pararse)',short:'alto riesgo',alt:true};
+  if(b<=10)return {cls:'ok',txt:'Normal (10 s o menos)',short:'normal',alt:false};
+  if(b<=20)return {cls:'warn',txt:'Riesgo leve de caída (más de 10 y hasta 20 s)',short:'riesgo leve',alt:true};
+  return {cls:'crit',txt:'Alto riesgo de caída (más de 20 s)',short:'alto riesgo',alt:true};
+}
+function tReady(){
+  if(T.running)return false;
+  if(T.id==='tug')return T.aid||tBest()!=null;
+  if(T.id==='stance')return tBest()!=null;
+  if(T.id==='chair')return T.done;
+  return T.done&&T.elapsed>0;
+}
+function tResult(){
+  const s=T.elapsed/1000;
+  if(T.id==='chair'){
+    const r=chairRef(),n=T.count;
+    let cls='none',txt='Selecciona un paciente con edad (60 a 94 años) y sexo para comparar con la referencia.';
+    if(r){cls=n<r.min?'warn':'ok';txt=n<r.min?'Bajo el promedio para su edad y sexo (menos de '+r.min+')':'Dentro o sobre el promedio para su edad y sexo (mínimo '+r.min+')';}
+    return {value:n,unit:'rep',head:n+' repeticiones',cls,txt,text:''};
+  }
+  if(T.id==='tug'){
+    if(T.aid){const c=tugClass(0,true);return {value:null,unit:'',res:'Alto riesgo',head:'Necesitó ayuda para ponerse de pie',cls:c.cls,txt:c.txt,text:'Necesitó ayuda para ponerse de pie, prueba suspendida · alto riesgo'};}
+    const b=tBest(),a=T.att.filter(x=>x!=null),c=tugClass(b,false);
+    return {value:r1(b),unit:'s',head:t1(b)+' s · mejor de '+a.length+(a.length===1?' intento':' intentos'),cls:c.cls,txt:c.txt,text:'Intentos: '+a.map(t1).join(' / ')+' s · '+c.short};
+  }
+  if(T.id==='stance'){
+    const b=tBest(),a=T.uni[T.side].filter(x=>x!=null),c=uniClass(b);
+    return {value:r1(b),unit:'s',head:t1(b)+' s · pierna '+(T.side==='D'?'derecha':'izquierda')+' · mejor de '+a.length+(a.length===1?' intento':' intentos'),cls:c.cls,txt:c.txt,text:'Intentos: '+a.map(t1).join(' / ')+' s · '+c.short};
+  }
+  const full=s>=30;
+  return {value:r1(s),unit:'s',head:t1(s)+' s · ojos '+(T.eyes==='open'?'abiertos':'cerrados'),cls:full?'ok':'warn',txt:full?'Mantiene los 30 s':'No completa los 30 s',text:T.sway?'Oscilación: '+T.sway.toLowerCase():''};
+}
+function romInterp(){
+  const o=T.rom.open,c=T.rom.closed;
+  if(!o||!c)return null;
+  const okO=o.s>=30,okC=c.s>=30;
+  if(okO&&okC)return 'Romberg negativo: mantiene 30 s con ojos abiertos y cerrados.';
+  if(okO)return 'Romberg positivo: pierde el equilibrio al cerrar los ojos ('+t1(c.s)+' s). Sugiere un déficit propioceptivo o vestibular.';
+  return 'No logra 30 s con ojos abiertos ('+t1(o.s)+' s), así que el Romberg no es interpretable. Revisa otras causas de inestabilidad, como las cerebelosas.';
+}
+/* Riesgo de caídas: estación unipodal + TUG */
+function riskInfo(){
+  const D=bestTime(T.uni.D),I=bestTime(T.uni.I),tb=bestOf(T.att);
+  const tugDone=T.aid||tb!=null;
+  if(D==null&&I==null&&!tugDone)return null;
+  const miss=[];
+  if(D==null)miss.push('unipodal pierna derecha');
+  if(I==null)miss.push('unipodal pierna izquierda');
+  if(!tugDone)miss.push('TUG');
+  if(miss.length)return {miss};
+  const w=Math.min(D,I),u=uniClass(w),g=tugClass(tb,T.aid);
+  const uTxt='Unipodal: derecha '+t1(D)+' s, izquierda '+t1(I)+' s. Se usa la pierna con menor tiempo ('+t1(w)+' s): '+u.short+'.';
+  const gTxt=T.aid?'TUG: necesitó ayuda para ponerse de pie: alto riesgo.':'TUG: '+t1(tb)+' s: '+g.short+'.';
+  let cls,txt,res,act;
+  if(u.alt&&g.alt){cls='crit';res='Ambas alteradas';txt='Ambas pruebas alteradas. Debe derivarse a médico y al Taller de Prevención de Caídas.';act='Derivar a médico y Taller de Prevención de Caídas';}
+  else if(u.ind){cls='warn';res='Unipodal sin clasificar';txt=g.alt?'TUG alterado y unipodal entre 4 y 5 s, un rango que el manual no clasifica. Define según tu criterio clínico.':'TUG normal y unipodal entre 4 y 5 s, un rango que el manual no clasifica. Define según tu criterio clínico.';act='Definir con criterio clínico';}
+  else if(u.alt||g.alt){cls='warn';res='Una alterada';txt='Una prueba alterada ('+(u.alt?'unipodal':'TUG')+'). El manual indica derivar cuando ambas están alteradas.';act='Una sola prueba alterada';}
+  else{cls='ok';res='Ambas normales';txt='Ambas pruebas normales.';act='Sin hallazgos';}
+  return {cls,txt,res,uTxt,gTxt,text:uTxt+' '+gTxt+' '+act+'.'};
+}
+function tRiskUpdate(){
+  const box=$('#tRisk');if(!box)return;
+  const r=riskInfo();
+  if(!r){box.hidden=true;box.innerHTML='';return;}
+  box.hidden=false;
+  let h='<div><span class="eyebrow">Unipodal y TUG</span><h3 style="margin-top:2px">Riesgo de caídas</h3></div>';
+  if(r.miss){
+    h+='<p class="small muted">Falta medir: '+esc(r.miss.join(', '))+'.</p>';
+  }else{
+    h+='<p class="small">'+esc(r.uTxt)+'</p><p class="small">'+esc(r.gTxt)+'</p>';
+    h+='<span class="status '+r.cls+'">'+esc(r.txt)+'</span>';
+    if(r.cls==='crit')h+='<p class="small muted">Si además presenta deterioro de la visión, uso de benzodiazepinas u otros sedantes e ingesta de más de 4 fármacos al día, el manual lo considera una urgencia.</p>';
+    const done=T.saved.risk===r.text;
+    h+='<div class="row"><button class="btn primary" id="tRiskSave" type="button"'+(done?' disabled':'')+'>'+(done?'Clasificación guardada':'Guardar clasificación')+'</button></div>';
+  }
+  box.innerHTML=h;
+  const b=$('#tRiskSave');
+  if(b)b.onclick=()=>{
+    const q=riskInfo();
+    if(!q||q.miss||T.saved.risk===q.text)return;
+    if(!needPatient())return;
+    addRecord({kind:'prueba',key:'riesgo_caidas',label:'Riesgo de caídas (EMPAM)',side:'',value:null,unit:'',res:q.res,text:q.text,note:''});
+    T.saved.risk=q.text;tRiskUpdate();
+  };
+}
+function tSaveKey(){return T.id==='stance'?'st'+T.side:T.id==='romberg'?'rb'+T.eyes:T.id;}
+function tSig(){
+  if(T.id==='tug')return T.aid?'aid':T.att.join(',');
+  if(T.id==='stance')return T.uni[T.side].join(',');
+  if(T.id==='romberg')return String(T.elapsed);
+  return T.count+'|'+T.done;
+}
+function tAttHTML(){
+  const a=attOf(),best=tBest(),n=a.filter(x=>x!=null).length;
+  return a.map((v,i)=>{
+    const live=T.running&&i===T.cur;
+    return '<button type="button" class="att" data-i="'+i+'" aria-pressed="'+(i===T.cur)+'"'+(T.running?' disabled':'')+'>'
+      +'<span class="eyebrow">Intento '+(i+1)+'</span>'
+      +'<span class="tv'+(v==null?' empty':'')+'">'+(live?'…':v==null?'–':t1(v)+' s')+'</span>'
+      +(!live&&v!=null&&v===best&&n>1?'<span class="tag">Mejor</span>':'')+'</button>';
+  }).join('');
+}
+function tStartLabel(){
+  if(T.running)return 'Detener';
+  if(hasAtt())return 'Iniciar intento '+(T.cur+1);
+  return T.done?'Nueva medición':'Iniciar';
+}
+function tUpdate(){
+  const clk=$('#tClk');if(clk)clk.textContent=tClockText();
+  const st=$('#tStart');if(st)st.textContent=tStartLabel();
+  const tap=$('#tTap');if(tap){tap.disabled=!T.running;tap.textContent=T.count;}
+  const att=$('#tAtt');if(att)att.innerHTML=tAttHTML();
+  const out=$('#tOut'),sv=$('#tSave');
+  if(out){
+    let o='';
+    if(tReady()){
+      const r=tResult();
+      o+='<div class="readout"><span class="eyebrow">Resultado</span><div class="mono" style="font-size:20px;font-weight:500">'+esc(r.head)+'</div><span class="status '+r.cls+'">'+esc(r.txt)+'</span></div>';
+    }
+    if(T.id==='romberg'){const q=romInterp();if(q)o+='<div class="hint"><b>Interpretación orientativa</b><br>'+esc(q)+'</div>';}
+    out.innerHTML=o;
+  }
+  if(sv){
+    const done=T.saved[tSaveKey()]===tSig();
+    sv.disabled=!tReady()||done;
+    sv.textContent=done&&tReady()?'Resultado guardado':'Guardar resultado';
+  }
+  tRiskUpdate();
+}
+function tTick(){
+  if(!T.running)return;
+  T.elapsed=performance.now()-T.t0;
+  if(tCapped()&&T.elapsed>=30000){T.elapsed=30000;tFinish();return;}
+  const clk=$('#tClk');if(clk)clk.textContent=tClockText();
+  T.raf=requestAnimationFrame(tTick);
+}
+function tAdvance(){
+  const a=attOf(),nx=a.findIndex(x=>x==null);
+  if(nx>=0)T.cur=nx;
+}
+function tFinish(){
+  cancelAnimationFrame(T.raf);T.running=false;
+  if(T.elapsed<300&&T.id!=='chair'){           /* toque accidental */
+    T.elapsed=0;T.done=false;tUpdate();return;
+  }
+  T.done=true;
+  if(hasAtt()){attOf()[T.cur]=T.elapsed/1000;tAdvance();}
+  if(T.id==='romberg')T.rom[T.eyes]={s:T.elapsed/1000};
+  tUpdate();
+}
+function tAbort(){cancelAnimationFrame(T.raf);T.running=false;}
+function tResetAll(){
+  tAbort();T.elapsed=0;T.done=false;T.count=0;T.att=[null,null,null];T.uni={D:[null,null,null],I:[null,null,null]};T.cur=0;T.aid=false;T.rom={open:null,closed:null};T.sway='';T.saved={};
+}
+function tRender(){
+  const c=TCFG[T.id],panel=$('#tPanel');
+  let h='<div><h3>'+esc(c.name)+'</h3><ul class="small muted" style="margin:6px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:3px">'+c.desc.map(l=>'<li>'+esc(l)+'</li>').join('')+'</ul></div>';
+  if(T.id==='stance')h+='<div class="seg" id="tSide"></div>';
+  if(T.id==='romberg')h+='<div class="seg" id="tEyes"></div>';
+  if(hasAtt())h+='<div class="atts" id="tAtt"></div>';
+  if(T.id==='tug')h+='<label class="check" for="tAid"><input type="checkbox" id="tAid"'+(T.aid?' checked':'')+'><span>Necesitó ayuda para ponerse de pie. Se suspende la prueba y se clasifica como alto riesgo.</span></label>';
+  h+='<div class="clock" id="tClk"></div>';
+  if(T.id==='chair')h+='<button class="tapbtn" id="tTap" type="button" aria-label="Sumar una repetición" disabled>0</button><div class="row"><button class="btn sm ghost" id="tMinus" type="button">Restar una</button></div>';
+  h+='<div class="row"><button class="btn primary" id="tStart" type="button" style="flex:1"></button><button class="btn" id="tReset" type="button">Reiniciar</button></div>';
+  if(T.id==='stance')h+='<div class="row"><button class="btn sm ghost" id="tFail" type="button">No logra la posición o pierde el apoyo (0 s)</button></div>';
+  if(T.id==='romberg')h+='<div class="stack" style="gap:5px"><span class="eyebrow">Oscilación observada</span><div class="seg" id="tSway"></div></div>';
+  h+='<div id="tOut" class="stack"></div>';
+  h+='<label class="f" for="tNote">Nota<input type="text" id="tNote" placeholder="Ayuda técnica, dolor, observaciones…"></label>';
+  h+='<div class="row"><button class="btn primary" id="tSave" type="button" disabled>Guardar resultado</button></div>';
+  h+='<p class="small muted">'+esc(c.ref)+'</p>';
+  panel.innerHTML=h;
+  if(T.id==='stance')seg($('#tSide'),[['D','Pierna derecha'],['I','Pierna izquierda']],T.side,v=>{
+    tAbort();T.side=v;const i=T.uni[v].findIndex(x=>x==null);T.cur=i>=0?i:0;T.done=false;T.elapsed=0;tUpdate();
+  });
+  if(T.id==='romberg'){
+    seg($('#tEyes'),[['open','Ojos abiertos'],['closed','Ojos cerrados']],T.eyes,v=>{tAbort();T.eyes=v;T.done=false;T.elapsed=0;tUpdate();});
+    seg($('#tSway'),[['Ninguna','Ninguna'],['Leve','Leve'],['Moderada','Moderada'],['Marcada','Marcada']],T.sway,v=>{T.sway=v;});
+  }
+  if(T.id==='tug')$('#tAid').onchange=()=>{T.aid=$('#tAid').checked;tUpdate();};
+  if(hasAtt())$('#tAtt').onclick=e=>{
+    const b=e.target.closest('.att');
+    if(!b||T.running)return;
+    T.cur=+b.dataset.i;T.elapsed=(attOf()[T.cur]||0)*1000;T.done=false;tUpdate();
+  };
+  if(T.id==='stance')$('#tFail').onclick=()=>{
+    tAbort();attOf()[T.cur]=0;T.elapsed=0;T.done=true;tAdvance();tUpdate();
+  };
+  $('#tStart').onclick=()=>{
+    if(T.running){tFinish();return;}
+    if(hasAtt())attOf()[T.cur]=null;
+    else{T.count=0;T.done=false;}
+    T.elapsed=0;T.running=true;T.t0=performance.now();
+    tUpdate();T.raf=requestAnimationFrame(tTick);
+  };
+  $('#tReset').onclick=()=>{tResetAll();tRender();};
+  if(T.id==='chair'){
+    $('#tTap').onclick=()=>{if(T.running){T.count++;$('#tTap').textContent=T.count;}};
+    $('#tMinus').onclick=()=>{if(T.count>0){T.count--;tUpdate();}};
+  }
+  $('#tSave').onclick=()=>{
+    if(!tReady()||T.saved[tSaveKey()]===tSig())return;
+    if(!needPatient())return;
+    const r=tResult();
+    let label=c.name,key=T.id,side='';
+    if(T.id==='stance')side=T.side;
+    if(T.id==='chair')label='Sentarse y pararse 30 s';
+    if(T.id==='romberg'){label='Romberg ('+(T.eyes==='open'?'ojos abiertos':'ojos cerrados')+')';key='romberg_'+T.eyes;}
+    addRecord({kind:'prueba',key,label,side,value:r.value,unit:r.unit,res:r.res||'',text:r.text||'',note:$('#tNote').value.trim()});
+    T.saved[tSaveKey()]=tSig();
+    $('#tNote').value='';
+    tUpdate();
+  };
+  tUpdate();
+}
+function initTests(){
+  seg($('#tSeg'),Object.keys(TCFG).map(k=>[k,TCFG[k].short]),T.id,v=>{
+    tAbort();T.id=v;T.done=false;T.elapsed=0;T.count=0;
+    const a=hasAtt()?attOf():null;
+    if(a){const i=a.findIndex(x=>x==null);T.cur=i>=0?i:0;}
+    tRender();
+  });
+  hooks.pruebas=tRender;
+  hooks.leavePruebas=()=>{if(T.running){tAbort();T.elapsed=0;T.done=false;}};
+  hooks.resetTests=()=>{tResetAll();if(current==='pruebas')tRender();};
+}
+
+/* ---------- historial ---------- */
+const H={filter:'all'};
+let hDelId=null,hDelT=0;
+const sideTxt=s=>s==='D'?' (derecho)':s==='I'?' (izquierdo)':'';
+function recValue(r){
+  if(r.kind==='rom')return r.value+'°';
+  if(r.kind==='prueba'){
+    if(r.value==null)return r.res||'';
+    if(r.unit==='s')return t1(r.value)+' s';
+    return r.value+' '+r.unit;
+  }
+  return '';
+}
+function betterDown(r){return r.key==='tug'||(r.kind==='rom'&&r.ref===0);}
+function unitOf(r){return r.kind==='rom'?'°':r.unit==='rep'?' rep':' '+r.unit;}
+function spark(vals){
+  const w=96,h=28,pad=3,mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals),sp=(mx-mn)||1;
+  const pts=vals.map((v,i)=>[pad+i*(w-2*pad)/(vals.length-1),h-pad-(v-mn)/sp*(h-2*pad)]);
+  const line=pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+  const area=pad+','+(h-pad)+' '+line+' '+(w-pad)+','+(h-pad);
+  const e=pts[pts.length-1];
+  return '<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'" aria-hidden="true"><polygon points="'+area+'" style="fill:var(--accent-soft)"/><polyline points="'+line+'" style="fill:none;stroke:var(--accent);stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round"/><circle cx="'+e[0].toFixed(1)+'" cy="'+e[1].toFixed(1)+'" r="3" style="fill:var(--accent)"/></svg>';
+}
+function hRecords(){
+  return DB.records.filter(r=>r.pid===DB.pid).sort((a,b)=>b.ts-a.ts);
+}
+function evoGroups(list){
+  const groups={};
+  list.filter(r=>r.kind!=='postura'&&r.value!=null).forEach(r=>{const g=r.key+'|'+r.side;(groups[g]=groups[g]||[]).push(r);});
+  return Object.keys(groups).map(k=>groups[k].sort((a,b)=>a.ts-b.ts)).filter(a=>a.length>=2);
+}
+function renderHistory(){
+  const p=patient();
+  $('#hTitle').textContent=p?p.name:'Historial';
+  $('#hSub').textContent=p?[p.age?p.age+' años':'',p.dx].filter(Boolean).join(' · '):'Selecciona un paciente para ver su evolución.';
+  const all=hRecords();
+  const list=all.filter(r=>H.filter==='all'||r.kind===H.filter);
+  const noP='<div class="empty-state"><p>Aún no hay un paciente seleccionado.</p><button class="btn sm" type="button" data-go="pacientes">Ir a Pacientes</button></div>';
+  if(!p){
+    $('#hEvo').innerHTML=noP;$('#hList').innerHTML='';
+    ['#hCsv','#hCopy','#hPdf'].forEach(s=>{$(s).disabled=true;});
+    return;
+  }
+  ['#hCsv','#hCopy','#hPdf'].forEach(s=>{$(s).disabled=!all.length;});
+  const evo=evoGroups(list);
+  $('#hEvo').innerHTML=evo.length?'<span class="eyebrow">Evolución</span>'+evo.map(a=>{
+    const f=a[0],l=a[a.length-1],d=r1(l.value-f.value),down=betterDown(l);
+    const good=d===0?0:((d<0)===down?1:-1);
+    const col=good>0?'var(--ok)':good<0?'var(--crit)':'var(--muted)';
+    const u=unitOf(l);
+    return '<div class="evo"><div style="min-width:0"><div style="font-weight:600">'+esc(l.label)+sideTxt(l.side)+'</div><div class="small muted mono">'+num(f.value)+u+' a '+num(l.value)+u+' · '+a.length+' mediciones</div></div>'+spark(a.map(x=>x.value))+'<div class="delta" style="color:'+col+'">'+(d>0?'+':d<0?'−':'')+num(Math.abs(d))+u+'</div></div>';
+  }).join(''):'<p class="small muted">Cuando repitas una medición o una prueba, aquí verás la evolución con su gráfico.</p>';
+  $('#hList').innerHTML=list.length?'<span class="eyebrow">Registros</span>'+list.map(r=>{
+    const meta=[fmtDate(r.ts),r.text,r.note].filter(Boolean).join(' · ');
+    return '<div class="rec"><div class="t">'+esc(r.label)+sideTxt(r.side)+'</div><div class="v">'+esc(recValue(r))+'</div><div class="m">'+esc(meta)+' <button type="button" class="btn sm ghost" data-del="'+r.id+'" style="min-height:28px;padding:0 8px;font-size:12px">'+(hDelId===r.id?'Confirmar':'Eliminar')+'</button></div></div>';
+  }).join(''):'<div class="empty-state"><p>Sin registros en esta categoría.</p><p class="small">Guarda mediciones desde Medir, Postura o Pruebas.</p></div>';
+}
+function hText(){
+  const p=patient(),rows=hRecords().slice().reverse();
+  const L=['Paciente: '+p.name+(p.age?' ('+p.age+' años)':'')];
+  if(p.dx)L.push('Motivo: '+p.dx);
+  L.push('');
+  rows.forEach(r=>{
+    const res=r.kind==='postura'?r.text:recValue(r)+(r.kind==='rom'&&r.ref?' (ref. '+r.ref+'°)':'')+(r.text?' ['+r.text+']':'');
+    L.push(fmtDate(r.ts)+' · '+r.label+sideTxt(r.side)+': '+res+(r.note?' — '+r.note:''));
+  });
+  return L.join('\n');
+}
+function initHistory(){
+  seg($('#hFilter'),[['all','Todo'],['rom','Rangos'],['postura','Postura'],['prueba','Pruebas']],H.filter,v=>{H.filter=v;renderHistory();});
+  $('#v-historial').onclick=e=>{
+    const go=e.target.closest('[data-go]');if(go){showView(go.dataset.go);return;}
+    const d=e.target.closest('[data-del]');
+    if(d){
+      if(hDelId===d.dataset.del&&Date.now()-hDelT<4000){
+        DB.records=DB.records.filter(r=>r.id!==hDelId);hDelId=null;saveDB();toast('Registro eliminado');
+      }else{hDelId=d.dataset.del;hDelT=Date.now();}
+      renderHistory();
+    }
+  };
+  $('#hCopy').onclick=()=>{
+    if(!patient())return;
+    const t=hText();
+    const fallback=()=>{
+      let ta=$('#hFallback');
+      if(!ta){ta=document.createElement('textarea');ta.id='hFallback';ta.readOnly=true;ta.style.minHeight='140px';$('#hCopy').parentElement.after(ta);}
+      ta.value=t;ta.select();toast('Selecciona y copia el texto de abajo');
+    };
+    try{navigator.clipboard.writeText(t).then(()=>toast('Resumen copiado'),fallback);}catch(e){fallback();}
+  };
+  hooks.historial=renderHistory;
+}
+
+/* ---------- exportar: PDF, CSV y respaldo ---------- */
+/* versión instalable: descarga normal del navegador */
+function plainDownload(filename,data){
+  const ext=filename.split('.').pop(),types={csv:'text/csv;charset=utf-8',json:'application/json',pdf:'application/pdf'};
+  const blob=data instanceof Blob?data:new Blob([data],{type:types[ext]||'text/plain;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download=filename;a.hidden=true;
+  document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},4000);
+  return true;
+}
+async function dlSave(filename,data,failMsg){
+  let dl=null;
+  try{dl=window.claude&&window.claude.use?await window.claude.use('downloads'):null;}catch(e){}
+  if(!dl&&!IN_VIEWER)return plainDownload(filename,data);
+  if(!dl){toast(failMsg||'La descarga no está disponible en esta vista.');return false;}
+  try{await dl.save({filename,data});return true;}
+  catch(err){
+    if(err&&err.code==='declined')return false;
+    toast(failMsg||'No se pudo descargar el archivo.');return false;
+  }
+}
+const isoLocal=ts=>{const d=new Date(ts);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+const today=()=>isoLocal(Date.now());
+function slug(s){return String(s).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'')||'paciente';}
+function csvCell(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"';}
+function hCsv(){
+  const rows=hRecords().slice().reverse();
+  const head=['Fecha','Tipo','Evaluación','Lado','Valor','Unidad','Referencia','Detalle','Nota'];
+  const tipo={rom:'Rango articular',postura:'Postura',prueba:'Prueba funcional'};
+  const lines=[head.map(csvCell).join(';')].concat(rows.map(r=>[
+    isoLocal(r.ts),tipo[r.kind]||r.kind,r.label,r.side==='D'?'Derecho':r.side==='I'?'Izquierdo':'',
+    r.value==null?'':String(r.value).replace('.',','),r.unit||'',r.ref?String(r.ref):'',r.text||'',r.note||''
+  ].map(csvCell).join(';')));
+  return '﻿'+lines.join('\r\n');
+}
+
+/* PDF: solo caracteres Latin-1, que es lo que admite la tipografía estándar del PDF */
+function pdfSafe(s){
+  return String(s==null?'':s).replace(/\s+/g,' ')
+    .replace(/[−–—]/g,'-').replace(/→/g,' a ').replace(/≥/g,'>=').replace(/≤/g,'<=')
+    .replace(/…/g,'...').replace(/[“”]/g,'"').replace(/[‘’]/g,"'")
+    .replace(/[^ -~ -ÿ]/g,'?');
+}
+/* respaldo de todas las fichas */
+function backupJson(){
+  return JSON.stringify({app:'arco',version:1,exported:new Date().toISOString(),patients:DB.patients,records:DB.records},null,1);
+}
+function restoreFrom(text){
+  let d;try{d=JSON.parse(text);}catch(e){return null;}
+  if(!d||d.app!=='arco'||!Array.isArray(d.patients)||!Array.isArray(d.records))return null;
+  const kinds={rom:1,postura:1,prueba:1};
+  const have=new Set(DB.patients.map(p=>p.id)),haveR=new Set(DB.records.map(r=>r.id));
+  let np=0,nr=0;
+  d.patients.forEach(p=>{
+    if(p&&typeof p.id==='string'&&typeof p.name==='string'&&!have.has(p.id)){
+      DB.patients.push({id:p.id,name:p.name.slice(0,120),age:+p.age||null,sex:p.sex==='F'||p.sex==='M'?p.sex:'',dx:String(p.dx||'').slice(0,300),consent:!!p.consent,example:!!p.example,created:+p.created||Date.now()});
+      have.add(p.id);np++;
+    }
+  });
+  d.records.forEach(r=>{
+    if(r&&typeof r.id==='string'&&typeof r.pid==='string'&&have.has(r.pid)&&kinds[r.kind]&&typeof r.label==='string'&&isFinite(+r.ts)&&!haveR.has(r.id)){
+      DB.records.push({id:r.id,pid:r.pid,ts:+r.ts,kind:r.kind,key:String(r.key||''),label:r.label.slice(0,160),side:r.side==='D'||r.side==='I'?r.side:'',value:(r.value!=null&&isFinite(+r.value))?+r.value:null,unit:String(r.unit||'').slice(0,8),res:String(r.res||'').slice(0,80),ref:r.ref?+r.ref:undefined,text:String(r.text||'').slice(0,400),note:String(r.note||'').slice(0,600)});
+      haveR.add(r.id);nr++;
+    }
+  });
+  if(!DB.pid&&DB.patients.length)DB.pid=DB.patients[0].id;
+  saveDB();
+  return {np,nr};
+}
+function initExport(){
+  $('#hCsv').onclick=async()=>{
+    if(!patient())return;
+    await dlSave('arco_'+slug(patient().name)+'_'+today()+'.csv',hCsv(),'No se pudo descargar. Usa «Copiar resumen».');
+  };
+  $('#hPdf').onclick=async()=>{
+    if(!patient())return;
+    let bytes=null;
+    try{bytes=await buildPdf();}catch(e){bytes=null;}
+    if(!bytes){toast('No se pudo preparar el PDF. Revisa la conexión e inténtalo de nuevo.');return;}
+    await dlSave('informe_'+slug(patient().name)+'_'+today()+'.pdf',new Blob([bytes],{type:'application/pdf'}),'No se pudo descargar el PDF.');
+  };
+  $('#bkSave').onclick=()=>dlSave('arco_respaldo_'+today()+'.json',backupJson(),'No se pudo descargar el respaldo.');
+  $('#bkLoad').onclick=()=>$('#bkIn').click();
+  $('#bkIn').onchange=()=>{
+    const f=$('#bkIn').files&&$('#bkIn').files[0];
+    $('#bkIn').value='';
+    if(!f)return;
+    const rd=new FileReader();
+    rd.onload=()=>{
+      const res=restoreFrom(String(rd.result));
+      if(!res){toast('El archivo no es un respaldo de Arco válido');return;}
+      updateChip();renderPatients();
+      toast(res.np||res.nr?'Restaurado: '+res.np+(res.np===1?' paciente':' pacientes')+' y '+res.nr+(res.nr===1?' registro':' registros'):'El respaldo no trae datos nuevos');
+    };
+    rd.onerror=()=>toast('No se pudo leer el archivo');
+    rd.readAsText(f);
+  };
+}
+
+/* informe PDF (pdf-lib, tipografía estándar Helvetica) */
+async function buildPdf(){
+  const L=window.PDFLib,p=patient();
+  if(!L||!p)return null;
+  const doc=await L.PDFDocument.create();
+  doc.setTitle(pdfSafe('Informe de evaluación kinésica - '+p.name));
+  const fR=await doc.embedFont(L.StandardFonts.Helvetica),fB=await doc.embedFont(L.StandardFonts.HelveticaBold);
+  const C=a=>L.rgb(a[0]/255,a[1]/255,a[2]/255);
+  const INK=C([18,35,43]),MUT=C([90,110,120]),ACC=C([10,108,126]),LINE=C([211,221,225]);
+  const mm=v=>v*2.8346,PW=595.28,PH=841.89,M=mm(18),CW=PW-2*M,BOT=mm(24);
+  let page=doc.addPage([PW,PH]),y=PH-M;
+  const pages=[page];
+  const need=h=>{if(y-h<BOT){page=doc.addPage([PW,PH]);pages.push(page);y=PH-M;return true;}return false;};
+  const txt=(s,x,size,font,color)=>page.drawText(pdfSafe(s),{x,y,size,font,color});
+  const rule=th=>page.drawLine({start:{x:M,y},end:{x:PW-M,y},thickness:th,color:LINE});
+  const wrap=(s,w,size,font)=>{
+    const out=[];let cur='';
+    pdfSafe(s).split(' ').forEach(word=>{
+      while(font.widthOfTextAtSize(word,size)>w){
+        let i=word.length-1;
+        while(i>1&&font.widthOfTextAtSize(word.slice(0,i),size)>w)i--;
+        if(cur){out.push(cur);cur='';}
+        out.push(word.slice(0,i));word=word.slice(i);
+      }
+      const t=cur?cur+' '+word:word;
+      if(font.widthOfTextAtSize(t,size)<=w)cur=t;else{if(cur)out.push(cur);cur=word;}
+    });
+    if(cur||!out.length)out.push(cur);
+    return out;
+  };
+
+  y-=22;txt('Informe de evaluación kinésica',M,20,fB,INK);
+  y-=16;txt('Generado el '+fmtDate(Date.now())+' con Arco',M,9,fR,MUT);
+  y-=9;page.drawLine({start:{x:M,y},end:{x:M+mm(24),y},thickness:2,color:ACC});
+  y-=26;txt(p.name,M,14,fB,INK);
+  const bits=[p.age?p.age+' años':'',p.sex==='F'?'Femenino':p.sex==='M'?'Masculino':''].filter(Boolean).join(' · ');
+  if(bits){y-=16;txt(bits,M,10,fR,MUT);}
+  if(p.dx)wrap('Motivo de consulta: '+p.dx,CW,10,fR).forEach(l=>{y-=14;txt(l,M,10,fR,INK);});
+  if(p.consent){y-=15;txt('Consentimiento informado registrado.',M,9,fR,MUT);}
+
+  const section=t=>{need(80);y-=24;txt(t,M,12,fB,ACC);y-=6;rule(0.8);};
+  const table=(cols,rows)=>{
+    const ws=cols.map(c=>mm(c.w));
+    const head=()=>{
+      y-=13;let x=M;
+      cols.forEach((c,i)=>{txt(c.h.toUpperCase(),x,7.5,fB,MUT);x+=ws[i];});
+      y-=5;rule(0.6);
+    };
+    need(60);head();
+    rows.forEach(r=>{
+      const cells=r.map((t,i)=>wrap(String(t),ws[i]-8,9,fR));
+      const n=Math.max.apply(null,cells.map(c=>c.length));
+      if(need(n*12+10))head();
+      y-=13;
+      let x=M;
+      cells.forEach((c,i)=>{c.forEach((l,k)=>{page.drawText(l,{x,y:y-k*12,size:9,font:fR,color:INK});});x+=ws[i];});
+      y-=(n-1)*12+5;rule(0.3);
+    });
+  };
+  const sideW=s=>s==='D'?'Derecho':s==='I'?'Izquierdo':'-';
+  const asc=hRecords().slice().reverse();
+
+  const evo=evoGroups(asc);
+  if(evo.length){
+    section('Evolución');
+    table([{h:'Medición',w:74},{h:'Inicial',w:28},{h:'Último',w:28},{h:'Cambio',w:24},{h:'Registros',w:20}],
+      evo.map(a=>{
+        const f=a[0],l=a[a.length-1],d=r1(l.value-f.value),u=unitOf(l);
+        return [l.label+sideTxt(l.side),num(f.value)+u,num(l.value)+u,(d>0?'+':d<0?'-':'')+num(Math.abs(d))+u,String(a.length)];
+      }));
+  }
+  const rom=asc.filter(r=>r.kind==='rom');
+  if(rom.length){
+    section('Rango articular');
+    table([{h:'Fecha',w:24},{h:'Evaluación',w:56},{h:'Lado',w:20},{h:'Valor',w:18},{h:'Ref.',w:16},{h:'Detalle',w:40}],
+      rom.map(r=>[fmtDate(r.ts),r.label,sideW(r.side),r.value+'°',r.ref?r.ref+'°':'-',[r.text,r.note].filter(Boolean).join(' · ')]));
+  }
+  const pru=asc.filter(r=>r.kind==='prueba');
+  if(pru.length){
+    section('Pruebas funcionales');
+    table([{h:'Fecha',w:24},{h:'Prueba',w:54},{h:'Lado',w:20},{h:'Resultado',w:24},{h:'Detalle',w:52}],
+      pru.map(r=>[fmtDate(r.ts),r.label,sideW(r.side),recValue(r),[r.text,r.note].filter(Boolean).join(' · ')]));
+  }
+  const pos=asc.filter(r=>r.kind==='postura');
+  if(pos.length){
+    section('Postura');
+    table([{h:'Fecha',w:24},{h:'Vista',w:44},{h:'Hallazgos',w:106}],
+      pos.map(r=>[fmtDate(r.ts),r.label,[r.text,r.note].filter(Boolean).join(' · ')]));
+  }
+  pages.forEach((pg,i)=>{
+    pg.drawText(pdfSafe('Valores de referencia orientativos (AAOS, EMPAM-MINSAL, STEADI y otros). No reemplaza el juicio clínico.'),{x:M,y:mm(12),size:8,font:fR,color:MUT});
+    const t='Página '+(i+1)+' de '+pages.length;
+    pg.drawText(t,{x:PW-M-fR.widthOfTextAtSize(t,8),y:mm(12),size:8,font:fR,color:MUT});
+  });
+  return doc.save();
+}
+
+/* ---------- inicio ---------- */
+function boot(){
+  if(!loadDB()){seed();saveDB();}
+  buildTabs();initPatients();initGonio();initPosture();initTests();initHistory();initExport();
+  updateChip();updateStoreNote();
+  showView('medir');
+}
+boot();
+})();
+</script>
+
+<script>if('serviceWorker' in navigator&&location.protocol!=='file:'){addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+</body>
+</html>
