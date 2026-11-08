@@ -6,13 +6,13 @@
 <meta name="theme-color" content="#0A6C7E">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Arco">
+<meta name="apple-mobile-web-app-title" content="Eval. Inicial">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 </head>
 <body>
-<title>Arco Kinesio</title>
+<title>Evaluación Inicial</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: app de una columna en celular (cabecera fija, vistas, barra inferior); en pantallas anchas la vista de medición se divide en lienzo + panel. */
@@ -65,7 +65,8 @@ button{cursor:pointer}
 .top .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .brand{display:flex;align-items:center;gap:10px;min-width:0}
 .brand svg{flex:none;color:var(--accent)}
-.wordmark{font-family:var(--font-display);font-size:28px;line-height:1;letter-spacing:-.01em}
+.wordmark{font-family:var(--font-display);font-size:26px;line-height:1;letter-spacing:-.01em;white-space:nowrap}
+@media (max-width:420px){.wordmark{font-size:21px}.brand svg{width:24px;height:24px}.chip-patient{max-width:44%}}
 .chip-patient{display:flex;align-items:center;gap:8px;max-width:58%;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-size:13px;font-weight:500}
 .chip-patient span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .chip-patient i{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
@@ -161,8 +162,8 @@ table.data th.n{text-align:right}
 /* Barra inferior */
 .tabs{position:fixed;left:0;right:0;bottom:0;z-index:9;background:var(--surface);border-top:1px solid var(--line);
   padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
-.tabs .wrap{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px}
-.tabs button{display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:transparent;color:var(--muted);padding:6px 2px;border-radius:8px;font-size:11px;font-weight:600}
+.tabs .wrap{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:2px}
+.tabs button{display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:transparent;color:var(--muted);padding:6px 0;border-radius:8px;font-size:10px;letter-spacing:-.01em;font-weight:600;min-width:0;overflow:hidden}
 .tabs button[aria-selected="true"]{color:var(--accent)}
 .tabs svg{width:22px;height:22px}
 
@@ -183,12 +184,66 @@ table.data th.n{text-align:right}
 .reads .num{font-family:var(--font-display);font-size:56px;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .sub-actions{display:flex;gap:10px;flex-wrap:wrap}
 [hidden]{display:none!important}
+
+/* Goniómetro tipo brújula */
+.dial{width:100%;max-width:290px;margin:0 auto}
+.dial svg{display:block;width:100%;height:auto}
+.dial .face{fill:var(--bg);stroke:var(--line);stroke-width:1.5}
+.dial .tk{stroke:var(--muted);stroke-linecap:round}
+.dial .tl{fill:var(--muted);font:500 11px var(--font-data);text-anchor:middle;dominant-baseline:central}
+.dial .tl.z{fill:var(--accent);font-weight:600;font-size:12px}
+.dial .fixed{stroke:var(--ink);stroke-width:2;stroke-dasharray:5 4;stroke-linecap:round;opacity:.55}
+.dial .sweep{fill:var(--accent);fill-opacity:.18;stroke:var(--accent);stroke-width:1.5}
+.dial .maxmk{fill:var(--warn)}
+.dial .needle{transform-box:view-box;transform-origin:130px 130px}
+@media (prefers-reduced-motion:no-preference){.dial .needle{transition:transform .12s linear}}
+.dial .needle line{stroke:#E4572E;stroke-width:3.5;stroke-linecap:round}
+.dial .needle path{fill:#E4572E}
+.dial .needle .tail{stroke:var(--ink);stroke-width:3.5;opacity:.5}
+.dial .hub{fill:var(--surface);stroke:var(--ink);stroke-width:2}
+.dial .val{fill:var(--ink);font:600 22px var(--font-data);text-anchor:middle;dominant-baseline:central}
+.dial.off .needle line,.dial.off .needle path{opacity:.35}
+
+/* Dolor */
+.bm{display:block;width:100%;max-width:330px;margin:0 auto;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.bm .rg{fill:var(--surface-2);stroke:var(--muted);stroke-width:.9;cursor:pointer;transition:fill .12s}
+.bm .rg.p{fill:#D9412F}
+.bm .rg.r{fill:#F0A429}
+.bm .side{fill:var(--muted);font:600 10px var(--font-ui);text-anchor:middle}
+.bm-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);justify-content:center}
+.bm-legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:7px 12px;font-size:13px;font-weight:600;color:var(--ink);min-height:36px}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.chip.p{border-color:#D9412F;color:#B3312B;background:transparent}
+.chip.r{border-color:#F0A429;color:var(--warn);background:transparent}
+.ena{display:grid;grid-template-columns:repeat(11,minmax(0,1fr));gap:3px}
+.ena button{min-height:42px;border:0;border-radius:7px;font-family:var(--font-data);font-weight:600;font-size:15px;color:#12232B;padding:0}
+.ena button[aria-pressed="true"]{outline:3px solid var(--ink);outline-offset:1px;transform:scale(1.06)}
+.ena-ends{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+.aq{display:grid;grid-template-columns:34px minmax(0,1fr);gap:4px 12px;align-items:start;padding:12px 0;border-bottom:1px solid var(--line)}
+.aq:last-child{border-bottom:0}
+.aq .L{width:34px;height:34px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-family:var(--font-display);font-size:22px;line-height:1}
+.aq .B{display:flex;flex-direction:column;gap:8px;min-width:0}
+.aq .B h3 small{font-weight:500;color:var(--muted);font-size:12px;margin-left:4px}
+.ena-big{font-family:var(--font-display);font-size:44px;line-height:1}
+details.xd>summary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px;cursor:pointer}
+details.xd>summary::-webkit-details-marker{display:none}
+details.xd>summary::after{content:"";width:9px;height:9px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);margin:0 4px 4px auto;flex:none}
+details.xd[open]>summary::after{transform:rotate(-135deg);margin-bottom:-4px}
+details.xd>summary .status{flex:none}
+.yn{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.yn .seg{width:112px}
+.yn .seg button{padding:6px 4px}
+.qh{font-size:12px;font-weight:600;color:var(--muted);margin-top:10px}
+.rfg{display:flex;flex-direction:column;gap:6px}
+.rfg .check{font-size:14px}
 </style>
 <script src="pdf-lib.min.js"></script>
 <header class="top"><div class="wrap">
   <div class="brand">
     <svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M5 27 L27 27"/><path d="M5 27 L22 6"/><path d="M14 27 A9 9 0 0 0 11.6 20.6" stroke-width="2"/></svg>
-    <span class="wordmark">Arco</span>
+    <span class="wordmark">Evaluación Inicial</span>
   </div>
   <button class="chip-patient" id="chipPatient" type="button"><i></i><span id="chipName">Sin paciente</span></button>
 </div></header>
@@ -246,7 +301,8 @@ table.data th.n{text-align:right}
       <input type="file" id="gIn" accept="image/*,video/*" hidden>
     </div>
     <div class="card stack" id="gSensPane" hidden>
-      <div class="stack" style="gap:5px"><span class="eyebrow">Ángulo respecto a</span><div class="seg" id="sModeSeg"></div></div>
+      <div class="stack" style="gap:5px"><span class="eyebrow">Modo de medición</span><div class="seg" id="sModeSeg"></div></div>
+      <div class="dial off" id="sDial"></div>
       <div class="reads">
         <div><span class="eyebrow">Ahora</span><div class="num" id="sNow">–</div></div>
         <div><span class="eyebrow">Máximo</span><div class="num" id="sMax">–</div></div>
@@ -330,6 +386,48 @@ table.data th.n{text-align:right}
   <div class="card stack" id="tRisk" hidden></div>
 </section>
 
+<section class="view" id="v-dolor" data-view="dolor" hidden>
+  <div class="view-head"><span class="eyebrow">Dolor · ALICIAA</span><h2>Evaluación del dolor</h2><p>Pide al paciente que toque en el dibujo dónde le duele y que puntúe su dolor de 0 a 10. Luego completa la caracterización.</p></div>
+  <div class="split">
+    <div class="card stack">
+      <div class="seg" id="bmView"></div>
+      <div class="stack" style="gap:5px"><span class="eyebrow">Al tocar se marca</span><div class="seg" id="bmMode"></div></div>
+      <svg class="bm" id="bmSvg" viewBox="0 0 200 436" aria-label="Mapa corporal: toca una zona para marcarla"></svg>
+      <div class="bm-legend"><span><i style="background:#D9412F"></i>Dolor</span><span><i style="background:#F0A429"></i>Irradiación</span></div>
+      <div class="chips" id="bmList"></div>
+      <div class="row"><button class="btn sm ghost" id="bmClear" type="button">Borrar marcas</button></div>
+    </div>
+    <div class="stack">
+      <div class="card" id="painForm"></div>
+      <details class="card stack xd" id="dn4Box">
+        <summary><span><span class="eyebrow">Dolor neuropático</span><h3>Cuestionario DN4</h3></span><span id="dn4Badge" class="status none">Sin aplicar</span></summary>
+        <div class="stack" style="margin-top:12px">
+          <p class="small muted">Pregunta por el dolor que motiva la consulta. Cada «Sí» suma 1 punto. Las preguntas 1 y 2 son de entrevista; la 3 y la 4, de exploración.</p>
+          <div id="dn4Items" class="stack" style="gap:0"></div>
+          <div id="dn4Res"></div>
+          <p class="small muted">Punto de corte 4 de 10. Versión española validada por Pérez y cols. (Health Qual Life Outcomes, 2007). Es un cuestionario de tamizaje: no reemplaza el diagnóstico.</p>
+        </div>
+      </details>
+      <details class="card stack xd" id="rfBox">
+        <summary><span><span class="eyebrow">Columna</span><h3>Banderas rojas</h3></span><span id="rfBadge" class="status none">Sin revisar</span></summary>
+        <div class="stack" style="margin-top:12px">
+          <p class="small muted">Marca solo lo que esté presente. Ninguna bandera por sí sola es diagnóstica: interprétalas junto con la historia y el examen.</p>
+          <div id="rfItems" class="stack"></div>
+          <div id="rfRes"></div>
+          <p class="small muted">Basado en el marco internacional de IFOMPT para patología espinal grave (Finucane y cols., JOSPT 2020): síndrome de cauda equina, fractura, malignidad e infección.</p>
+        </div>
+      </details>
+      <div class="card stack">
+        <span class="eyebrow">Resumen</span>
+        <div id="painSum" class="small stack" style="gap:4px"></div>
+        <label class="f" for="painNote">Nota<textarea id="painNote" placeholder="Banderas rojas, conducta del dolor, observaciones…"></textarea></label>
+        <div class="row"><button class="btn primary" id="painSave" type="button">Guardar evaluación del dolor</button></div>
+        <p class="small muted">ENA de 0 a 10. Una reducción de unos 2 puntos o del 30 % se considera clínicamente importante (Farrar y cols., Pain 2001). Orientativo: no reemplaza el juicio clínico.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="view" id="v-historial" data-view="historial" hidden>
   <div class="view-head"><span class="eyebrow">Evolución</span><h2 id="hTitle">Historial</h2><p id="hSub"></p></div>
   <div class="seg" id="hFilter"></div>
@@ -404,9 +502,10 @@ const ICONS={
   medir:'<path d="M4 20h16"/><path d="M4 20 16 5"/><path d="M11 20a7 7 0 0 0-1.8-4.7"/>',
   postura:'<circle cx="12" cy="5" r="2.2"/><path d="M12 8v7M8 10h8M12 15l-3 6M12 15l3 6"/>',
   pruebas:'<circle cx="12" cy="13.5" r="7"/><path d="M12 13.5V9.5M9.5 3h5"/>',
-  historial:'<path d="M4 20V4M4 20h16"/><path d="M8 15l4-4 3 3 5-6"/>'
+  historial:'<path d="M4 20V4M4 20h16"/><path d="M8 15l4-4 3 3 5-6"/>',
+  dolor:'<path d="M13 2.5 5.5 13.5h5.5l-1 8 7.5-11h-5.5z"/>'
 };
-const TABS=[['pacientes','Pacientes'],['medir','Medir'],['postura','Postura'],['pruebas','Pruebas'],['historial','Historial']];
+const TABS=[['pacientes','Pacientes'],['medir','Medir'],['postura','Postura'],['pruebas','Pruebas'],['dolor','Dolor'],['historial','Historial']];
 let current='pacientes';
 function buildTabs(){
   $('#tabs').innerHTML=TABS.map(([id,l])=>'<button type="button" role="tab" data-id="'+id+'" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+ICONS[id]+'</svg>'+l+'</button>').join('');
@@ -428,6 +527,7 @@ function updateChip(){
   $('#chipName').textContent=p?p.name:'Sin paciente';
   $('#chipPatient').classList.toggle('on',!!p);
   if(hooks.resetTests)hooks.resetTests();
+  if(hooks.resetPain)hooks.resetPain();
 }
 let delArm=0;
 function renderPatients(){
@@ -643,6 +743,7 @@ const JOINTS=[
   {id:'cflex',name:'Cervical · Flexión',ref:45,f:'d',m:'v',hint:'Vista lateral. Origen: C7. Extremo: trago. Se mide contra la vertical.'},
   {id:'cext',name:'Cervical · Extensión',ref:45,f:'d',m:'v',hint:'Vista lateral. Origen: C7. Extremo: trago. Se mide contra la vertical.'},
   {id:'clat',name:'Cervical · Inclinación lateral',ref:45,f:'d',m:'v',hint:'Vista posterior. Origen: C7. Extremo: protuberancia occipital externa.'},
+  {id:'crot',name:'Cervical · Rotación',ref:80,f:'d',m:'3',hint:'Vista superior, paciente sentado. Fulcro: vértex (centro de la cabeza). Fijo: línea hacia adelante en posición neutra. Móvil: punta de la nariz al rotar. Con el sensor, usa el modo «Brújula».'},
   {id:'lflex',name:'Lumbar · Flexión',ref:60,f:'d',m:'v',hint:'Vista lateral. Origen: S2. Extremo: T12 o C7. Mide la inclinación del tronco contra la vertical.'},
   {id:'lext',name:'Lumbar · Extensión',ref:25,f:'d',m:'v',hint:'Vista lateral. Origen: S2. Extremo: T12 o C7. Mide la inclinación del tronco contra la vertical.'},
   {id:'llat',name:'Lumbar · Inclinación lateral',ref:25,f:'d',m:'v',hint:'Vista posterior. Origen: S2. Extremo: C7. Contra la vertical.'},
@@ -744,9 +845,10 @@ function gMoveChanged(){
 function gHint(){
   let t;
   if(G.src==='sensor'){
-    t=(G.j==='columna'&&G.m==='trot')
-      ?'Esta rotación ocurre en el plano horizontal y el sensor del celular no la detecta. Usa la imagen o escribe el valor de tu goniómetro.'
-      :'Apoya el celular sobre el segmento que se mueve, con el borde largo alineado al hueso y bien fijo. Mide el giro respecto de la posición inicial. Referencia AAOS, orientativa.';
+    const hz=G.j==='columna'&&(G.m==='trot'||G.m==='crot');
+    if(hz&&S.mode!=='compass')t='Esta rotación ocurre en el plano horizontal: la gravedad no cambia y el inclinómetro no la detecta. Usa el modo «Brújula», la imagen o escribe el valor de tu goniómetro.';
+    else if(S.mode==='compass')t='Modo brújula: el celular va plano, con la pantalla hacia arriba, sobre el segmento que rota (por ejemplo, sobre la cabeza con el paciente sentado). Es menos confiable que el inclinómetro: aléjalo de metales e imanes y repite la medición. Referencia AAOS, orientativa.';
+    else t='Apoya el celular sobre el segmento que se mueve, con el borde largo alineado al hueso y bien fijo. La aguja muestra el giro respecto de la posición inicial. Referencia AAOS, orientativa.';
   }else t=mv().hint+' Referencia AAOS, orientativa.';
   $('#gHint').textContent=t;
 }
@@ -786,7 +888,7 @@ function initGonio(){
     if(!r){toast(G.src==='sensor'?'Aún no hay una medición para guardar':'Marca los puntos antes de guardar');return;}
     if(!needPatient())return;
     const m=mv();
-    addRecord({kind:'rom',key:G.j+'_'+G.m+'_'+G.side,label:jt().name+' · '+m.name,side:G.side,value:Math.round(r.value),unit:'°',ref:m.ref,note:$('#gNote').value.trim(),text:G.src==='sensor'?(S.manual!=null?'Valor manual':'Inclinómetro'):'Imagen',method:G.src==='sensor'?'sensor':G.meth});
+    addRecord({kind:'rom',key:G.j+'_'+G.m+'_'+G.side,label:jt().name+' · '+m.name,side:G.side,value:Math.round(r.value),unit:'°',ref:m.ref,note:$('#gNote').value.trim(),text:G.src==='sensor'?(S.manual!=null?'Valor manual':S.mode==='compass'?'Brújula (plano horizontal)':'Inclinómetro'):'Imagen',method:G.src==='sensor'?'sensor':G.meth});
     if(S.manual!=null){S.manual=null;$('#sManual').value='';gSync();}
     $('#gNote').value='';
   };
@@ -800,22 +902,35 @@ function initGonio(){
   hooks.medir=()=>{if(G.src==='img')gStage.render();};
 }
 
-/* ---------- inclinómetro (sensores del celular) ---------- */
-/* El ángulo es la separación entre el vector de gravedad actual y el de referencia (cero).
-   Mide giros en planos verticales; un giro alrededor del eje vertical no cambia la gravedad y no se detecta. */
+/* ---------- inclinómetro y brújula (sensores del celular) ---------- */
+/* Desde el cero / vertical: separación entre el vector de gravedad actual y el de referencia (acelerómetro).
+   Brújula: diferencia de rumbo (orientación del dispositivo) para giros en el plano horizontal. */
 const IN_VIEWER=!!(window.claude&&window.claude.use);   /* vista dentro de Claude: el navegador bloquea los sensores */
-const S={on:false,got:false,v:null,zero:null,ang:0,max:0,mode:'zero',manual:null,g:0,timer:0,raf:0,wl:null,msg:''};
+const S={on:false,got:false,gotO:false,v:null,zero:null,axis:null,hd:null,hd0:null,beta:0,gamma:0,ang:0,sg:0,max:0,maxSg:0,mode:'zero',manual:null,g:0,timer:0,raf:0,wl:null,msg:''};
 const sDot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const sCross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+const wrap180=d=>{d=((d%360)+540)%360-180;return d===-180?180:d;};
 function sUnit(x,y,z){const n=Math.hypot(x,y,z);return n?[x/n,y/n,z/n]:null;}
-function sAngle(v){
+/* ángulo con signo: el primer giro (más de 4°) define el sentido positivo */
+function sCur(){
+  if(S.mode==='compass')return (S.gotO&&S.hd0!=null)?wrap180(S.hd-S.hd0):0;
+  const v=S.v;if(!v)return 0;
   if(S.mode==='vertical')return Math.acos(Math.min(1,Math.abs(v[1])))/DEG;
   if(!S.zero)return 0;
-  return Math.acos(Math.max(-1,Math.min(1,sDot(v,S.zero))))/DEG;
+  const a=Math.acos(Math.max(-1,Math.min(1,sDot(v,S.zero))))/DEG,c=sCross(S.zero,v);
+  if(!S.axis&&a>4){const n=Math.hypot(c[0],c[1],c[2]);if(n)S.axis=[c[0]/n,c[1]/n,c[2]/n];}
+  return (S.axis&&sDot(c,S.axis)<0?-1:1)*a;
 }
+function sLive(){return S.mode==='compass'?(S.gotO&&S.hd0!=null):(S.got&&(S.mode==='vertical'||!!S.zero));}
 function sVal(){
   if(S.manual!=null)return S.manual;
-  if(!S.got||(S.mode==='zero'&&!S.zero))return null;
+  if(!sLive())return null;
   return S.max;
+}
+function sUpdate(){
+  S.sg=sCur();S.ang=Math.abs(S.sg);
+  if(S.ang>S.max){S.max=S.ang;S.maxSg=S.sg;}
+  sQueue();
 }
 function sOnMotion(e){
   const a=e.accelerationIncludingGravity;
@@ -823,16 +938,24 @@ function sOnMotion(e){
   const n=Math.hypot(a.x,a.y,a.z);
   if(!n)return;
   const u=[a.x/n,a.y/n,a.z/n];
-  if(!S.got){S.got=true;clearTimeout(S.timer);S.g=n;S.v=u;S.msg='';}
+  if(!S.got){S.got=true;S.g=n;S.v=u;if(S.mode!=='compass'){clearTimeout(S.timer);S.msg='';}}
   else{
     if(Math.abs(n-S.g)/S.g>0.12)return;           /* movimiento brusco: no es solo gravedad */
     S.g+=(n-S.g)*0.02;
     const k=0.25;
     S.v=sUnit(S.v[0]+(u[0]-S.v[0])*k,S.v[1]+(u[1]-S.v[1])*k,S.v[2]+(u[2]-S.v[2])*k)||S.v;
   }
-  S.ang=sAngle(S.v);
-  if(S.ang>S.max)S.max=S.ang;
-  sQueue();
+  if(S.mode!=='compass')sUpdate();
+}
+function sOnOrient(e){
+  let h=null;
+  if(e.alpha!=null&&isFinite(e.alpha))h=(360-e.alpha)%360;          /* rumbo creciente en sentido horario, visto desde arriba */
+  else if(typeof e.webkitCompassHeading==='number'&&isFinite(e.webkitCompassHeading))h=e.webkitCompassHeading;
+  if(h==null)return;
+  S.beta=e.beta||0;S.gamma=e.gamma||0;
+  if(!S.gotO){S.gotO=true;S.hd=h;if(S.mode==='compass'){clearTimeout(S.timer);S.msg='';}}
+  else S.hd=(S.hd+wrap180(h-S.hd)*0.35+360)%360;
+  if(S.mode==='compass')sUpdate();
 }
 function sQueue(){
   if(S.raf)return;
@@ -840,28 +963,80 @@ function sQueue(){
 }
 function sMessage(){
   if(S.msg)return S.msg;
-  if(!S.on&&S.got)return 'Sensor detenido. El valor máximo se conserva para guardarlo.';
-  if(!S.on&&IN_VIEWER)return 'Esta vista bloquea los sensores del celular. El inclinómetro funciona en la versión instalable de Arco. Mientras tanto, escribe abajo el valor de tu goniómetro.';
-  if(!S.on)return 'Toca «Iniciar sensor». Mide giros en planos verticales con una precisión de 1 a 3°. Los giros en plano horizontal no se detectan.';
+  if(!S.on&&(S.got||S.gotO))return 'Sensor detenido. El valor máximo se conserva para guardarlo.';
+  if(!S.on&&IN_VIEWER)return 'Esta vista bloquea los sensores del celular. El inclinómetro funciona en la versión instalable de Evaluación Inicial. Mientras tanto, escribe abajo el valor de tu goniómetro.';
+  if(!S.on)return S.mode==='compass'
+    ?'Toca «Iniciar sensor». La brújula mide giros en el plano horizontal (rotación cervical o de tronco).'
+    :'Toca «Iniciar sensor». Mide giros en planos verticales con una precisión de 1 a 3°. Para giros en el plano horizontal usa «Brújula».';
+  if(S.mode==='compass'){
+    if(!S.gotO)return 'Buscando la orientación del celular…';
+    if(Math.abs(S.beta)>35||Math.abs(S.gamma)>35)return 'Pon el celular plano, con la pantalla hacia arriba. Inclinado, el rumbo pierde precisión.';
+    if(S.hd0==null)return 'Apoya el celular plano sobre el segmento en posición neutra y toca «Marcar cero».';
+    return 'Rota hasta el final del rango. La aguja indica el sentido del giro; el valor más alto queda en Máximo.';
+  }
   if(!S.got)return 'Buscando el sensor…';
   if(S.mode==='vertical')return 'Alinea el borde largo del celular con el segmento. El ángulo se mide contra la vertical.';
   if(!S.zero)return 'Apoya el celular sobre el segmento en la posición inicial y toca «Marcar cero».';
-  return 'Lleva el segmento al final del rango. El valor más alto queda en Máximo.';
+  return 'Lleva el segmento al final del rango. La aguja sigue el movimiento y el valor más alto queda en Máximo.';
+}
+
+/* esfera tipo brújula: 0° arriba, sentido horario positivo */
+const DC=130,DR=112;
+function dPol(deg,r){const a=(deg-90)*DEG;return [DC+Math.cos(a)*r,DC+Math.sin(a)*r];}
+function dSector(a0,a1,r){
+  if(Math.abs(a1-a0)<0.5)return '';
+  const lo=Math.min(a0,a1),hi=Math.max(a0,a1),p=dPol(lo,r),q=dPol(hi,r),big=(hi-lo)>180?1:0;
+  return 'M'+DC+' '+DC+'L'+p[0].toFixed(1)+' '+p[1].toFixed(1)+'A'+r+' '+r+' 0 '+big+' 1 '+q[0].toFixed(1)+' '+q[1].toFixed(1)+'Z';
+}
+function dialBuild(){
+  let t='';
+  for(let d=0;d<360;d+=5){
+    const L=d%30===0?14:d%10===0?9:5,p=dPol(d,DR),q=dPol(d,DR-L);
+    t+='<line class="tk" x1="'+p[0].toFixed(1)+'" y1="'+p[1].toFixed(1)+'" x2="'+q[0].toFixed(1)+'" y2="'+q[1].toFixed(1)+'" stroke-width="'+(d%30===0?2:1)+'"/>';
+    if(d%30===0){const l=dPol(d,DR-26),v=d<=180?d:360-d;t+='<text class="tl'+(d===0?' z':'')+'" x="'+l[0].toFixed(1)+'" y="'+l[1].toFixed(1)+'">'+v+'°</text>';}
+  }
+  $('#sDial').innerHTML='<svg viewBox="0 0 260 260" role="img" aria-label="Goniómetro: el brazo fijo marca 0° arriba y la aguja sigue el segmento">'
+    +'<circle class="face" cx="'+DC+'" cy="'+DC+'" r="'+(DR+8)+'"/>'+t
+    +'<path class="sweep" id="dSweep" d=""/>'
+    +'<line class="fixed" x1="'+DC+'" y1="'+DC+'" x2="'+DC+'" y2="'+(DC-DR+38)+'"/>'
+    +'<path class="maxmk" id="dMax" d="M0 0" />'
+    +'<g class="needle" id="dNeedle"><line class="tail" x1="'+DC+'" y1="'+DC+'" x2="'+DC+'" y2="'+(DC+26)+'"/><line x1="'+DC+'" y1="'+DC+'" x2="'+DC+'" y2="'+(DC-DR+22)+'"/><path d="M'+DC+' '+(DC-DR+8)+'l-7 16h14z"/></g>'
+    +'<circle class="hub" cx="'+DC+'" cy="'+DC+'" r="7"/>'
+    +'<text class="val" id="dVal" x="'+DC+'" y="'+(DC+52)+'">–</text>'
+    +'</svg>';
+}
+function dialRender(){
+  const box=$('#sDial');if(!box||!box.firstChild)return;
+  const man=S.manual!=null,live=sLive();
+  let cur=man?S.manual:live?S.sg:0;
+  if(S.mode==='vertical'&&!man)cur=Math.abs(cur);
+  box.classList.toggle('off',!man&&!live);
+  $('#dNeedle').style.transform='rotate('+cur.toFixed(1)+'deg)';
+  $('#dSweep').setAttribute('d',(man||live)?dSector(0,cur,DR-34):'');
+  const mx=!man&&live&&S.max>0.5?(S.mode==='vertical'?S.max:S.maxSg):null;
+  if(mx!=null){const p=dPol(mx,DR+8),a=(mx)*DEG;
+    const n=[Math.sin(a),-Math.cos(a)],tg=[Math.cos(a),Math.sin(a)];
+    const b=[p[0]-n[0]*12,p[1]-n[1]*12];
+    $('#dMax').setAttribute('d','M'+p[0].toFixed(1)+' '+p[1].toFixed(1)+'L'+(b[0]+tg[0]*6).toFixed(1)+' '+(b[1]+tg[1]*6).toFixed(1)+'L'+(b[0]-tg[0]*6).toFixed(1)+' '+(b[1]-tg[1]*6).toFixed(1)+'Z');
+  }else $('#dMax').setAttribute('d','M0 0');
+  $('#dVal').textContent=(man||live)?Math.round(Math.abs(cur))+'°':'–';
 }
 function sRender(){
   const f=v=>Math.round(v)+'°';
-  const live=S.got&&(S.mode==='vertical'||!!S.zero);
+  const live=sLive();
   $('#sNow').textContent=live?f(S.ang):'–';
   $('#sMax').textContent=live?f(S.max):'–';
   const b=$('#sStart');
   b.textContent=S.on?'Detener sensor':'Iniciar sensor';
   b.classList.toggle('primary',!S.on);
-  $('#sZero').disabled=!S.on||!S.got||S.mode==='vertical';
+  $('#sZero').disabled=!S.on||(S.mode==='compass'?!S.gotO:(!S.got||S.mode==='vertical'));
   $('#sReset').disabled=!live;
   $('#sMsg').textContent=sMessage();
+  dialRender();
 }
 function sStop(msg){
   window.removeEventListener('devicemotion',sOnMotion);
+  window.removeEventListener('deviceorientation',sOnOrient);
   clearTimeout(S.timer);
   S.on=false;S.msg=msg||'';
   try{if(S.wl){S.wl.release();S.wl=null;}}catch(e){}
@@ -869,47 +1044,58 @@ function sStop(msg){
 }
 function sFail(why){
   sStop(IN_VIEWER
-    ?'Esta vista bloquea los sensores del celular. El inclinómetro funciona en la versión instalable de Arco. Mientras tanto, escribe abajo el valor de tu goniómetro.'
+    ?'Esta vista bloquea los sensores del celular. El inclinómetro funciona en la versión instalable de Evaluación Inicial. Mientras tanto, escribe abajo el valor de tu goniómetro.'
     :why==='perm'
       ?'El permiso del sensor fue rechazado. Actívalo en los ajustes del navegador e inténtalo de nuevo.'
-      :'No llegan datos del sensor. Este dispositivo o navegador no los entrega. Escribe el valor de tu goniómetro abajo o mide con la imagen.');
-  S.got=false;S.v=null;
+      :S.mode==='compass'
+        ?'No llegan datos de orientación. Este dispositivo o navegador no los entrega. Prueba el modo «Desde cero», la imagen o escribe el valor de tu goniómetro.'
+        :'No llegan datos del sensor. Este dispositivo o navegador no los entrega. Escribe el valor de tu goniómetro abajo o mide con la imagen.');
+  S.got=false;S.gotO=false;S.v=null;
   sRender();gSync();
+}
+function sWatch(){
+  clearTimeout(S.timer);
+  S.timer=setTimeout(()=>{if(S.on&&(S.mode==='compass'?!S.gotO:!S.got))sFail();},2500);
 }
 function sStart(){
   if(S.on){sStop();return;}
-  const DM=window.DeviceMotionEvent;
-  if(!DM){sFail();return;}
+  const DM=window.DeviceMotionEvent,DO=window.DeviceOrientationEvent;
+  if(!DM&&!DO){sFail();return;}
   const begin=()=>{
     window.addEventListener('devicemotion',sOnMotion);
-    S.on=true;S.got=false;S.v=null;S.zero=null;S.ang=0;S.max=0;S.manual=null;S.msg='';
+    window.addEventListener('deviceorientation',sOnOrient);
+    S.on=true;S.got=false;S.gotO=false;S.v=null;S.zero=null;S.axis=null;S.hd=null;S.hd0=null;S.ang=0;S.sg=0;S.max=0;S.maxSg=0;S.manual=null;S.msg='';
     $('#sManual').value='';
-    clearTimeout(S.timer);
-    S.timer=setTimeout(()=>{if(S.on&&!S.got)sFail();},2000);
+    sWatch();
     try{if(navigator.wakeLock)navigator.wakeLock.request('screen').then(l=>{S.wl=l;}).catch(()=>{});}catch(e){}
     sRender();gSync();
   };
-  if(typeof DM.requestPermission==='function'){
-    DM.requestPermission().then(r=>{if(r==='granted')begin();else sFail('perm');}).catch(()=>sFail());
+  const ask=E=>E&&typeof E.requestPermission==='function'?E.requestPermission():Promise.resolve('granted');
+  if((DM&&typeof DM.requestPermission==='function')||(DO&&typeof DO.requestPermission==='function')){
+    ask(DM).then(r=>r==='granted'?ask(DO).catch(()=>'granted'):r).then(r=>{if(r==='granted')begin();else sFail('perm');}).catch(()=>sFail());
   }else begin();
 }
 function sInit(){
-  seg($('#sModeSeg'),[['zero','Desde el cero'],['vertical','Contra la vertical']],S.mode,v=>{
-    S.mode=v;S.manual=null;$('#sManual').value='';
-    S.max=S.got&&S.v?sAngle(S.v):0;S.ang=S.max;
-    sRender();gSync();
+  dialBuild();
+  seg($('#sModeSeg'),[['zero','Desde cero'],['vertical','Vertical'],['compass','Brújula']],S.mode,v=>{
+    S.mode=v;S.manual=null;$('#sManual').value='';S.msg='';
+    S.zero=null;S.axis=null;S.hd0=null;
+    S.sg=sCur();S.ang=Math.abs(S.sg);S.max=S.ang;S.maxSg=S.sg;
+    if(S.on)sWatch();
+    gHint();sRender();gSync();
   });
   $('#sStart').onclick=sStart;
   $('#sZero').onclick=()=>{
-    if(!S.got||!S.v)return;
-    S.zero=S.v.slice();S.ang=0;S.max=0;S.manual=null;$('#sManual').value='';
+    if(S.mode==='compass'){if(!S.gotO)return;S.hd0=S.hd;}
+    else{if(!S.got||!S.v)return;S.zero=S.v.slice();S.axis=null;}
+    S.ang=0;S.sg=0;S.max=0;S.maxSg=0;S.manual=null;$('#sManual').value='';
     sRender();gSync();
   };
-  $('#sReset').onclick=()=>{S.manual=null;$('#sManual').value='';S.max=S.got?S.ang:0;sRender();gSync();};
+  $('#sReset').onclick=()=>{S.manual=null;$('#sManual').value='';S.max=sLive()?S.ang:0;S.maxSg=S.sg;sRender();gSync();};
   $('#sManual').oninput=()=>{
     const n=parseFloat($('#sManual').value.replace(',','.'));
     S.manual=(isFinite(n)&&n>=0&&n<=200)?n:null;
-    gSync();
+    sRender();gSync();
   };
   hooks.leaveMedir=()=>{if(S.on)sStop();};
   sRender();
@@ -1303,12 +1489,249 @@ function initTests(){
   hooks.resetTests=()=>{tResetAll();if(current==='pruebas')tRender();};
 }
 
+/* ---------- dolor: mapa corporal + ALICIAA ---------- */
+/* ALICIAA: Aparición, Localización, Intensidad, Carácter, Irradiación, Atenuantes, Agravantes. */
+const f1=n=>+n.toFixed(1);
+function shE(cx,cy,rx,ry){const k=.5523,ox=f1(rx*k),oy=f1(ry*k);
+  return 'M'+(cx-rx)+' '+cy+'C'+(cx-rx)+' '+f1(cy-oy)+' '+f1(cx-ox)+' '+(cy-ry)+' '+cx+' '+(cy-ry)+'C'+f1(cx+ox)+' '+(cy-ry)+' '+(cx+rx)+' '+f1(cy-oy)+' '+(cx+rx)+' '+cy
+   +'C'+(cx+rx)+' '+f1(cy+oy)+' '+f1(cx+ox)+' '+(cy+ry)+' '+cx+' '+(cy+ry)+'C'+f1(cx-ox)+' '+(cy+ry)+' '+(cx-rx)+' '+f1(cy+oy)+' '+(cx-rx)+' '+cy+'Z';}
+function shP(pts){return 'M'+pts.map(p=>p[0]+' '+p[1]).join('L')+'Z';}
+function shape(s,mir){
+  if(s[0]==='E')return shE(mir?200-s[1]:s[1],s[2],s[3],s[4]);
+  return shP(s[1].map(p=>[mir?200-p[0]:p[0],p[1]]));
+}
+/* [clave, nombre, femenino, forma, es par] — forma del lado izquierdo de la pantalla */
+const BM_SHAPES={
+  cabeza:['E',100,34,21,26], cuello:['P',[[89,58],[111,58],[113,74],[87,74]]],
+  torax:['P',[[78,76],[122,76],[121,138],[79,138]]], abdomen:['P',[[79,140],[121,140],[121,178],[79,178]]],
+  escapula:['P',[[78,76],[92,76],[92,138],[79,138]]], dorsal:['P',[[92,76],[108,76],[108,138],[92,138]]],
+  hombro:['E',68,84,14,12], brazo:['P',[[57,94],[74,97],[66,148],[50,145]]], codo:['E',57,153,10,9],
+  antebrazo:['P',[[48,160],[66,163],[59,207],[44,204]]], muneca:['E',51,213,9,7], mano:['E',49,235,10,15],
+  ingle:['P',[[79,180],[100,180],[100,206],[77,206]]], sacro:['E',100,191,7,11],
+  muslo:['P',[[77,208],[100,208],[97,288],[81,288]]], rodilla:['E',89,298,11,10],
+  pierna:['P',[[80,309],[98,309],[95,372],[84,372]]], tobillo:['E',89,379,9,6], pie:['E',89,397,10,13]
+};
+const BM_DEF={
+  A:[['cabeza','Cabeza y cara',1,'cabeza'],['cuello','Cuello (anterior)',0,'cuello'],['torax','Tórax',0,'torax'],['abdomen','Abdomen',0,'abdomen'],
+     ['hombro','Hombro',0,'hombro',1],['brazo','Brazo',0,'brazo',1],['codo','Codo',0,'codo',1],['antebrazo','Antebrazo',0,'antebrazo',1],['muneca','Muñeca',1,'muneca',1],['mano','Mano (palma)',1,'mano',1],
+     ['ingle','Cadera e ingle',1,'ingle',1],['muslo','Muslo (anterior)',0,'muslo',1],['rodilla','Rodilla',1,'rodilla',1],['pierna','Pierna (anterior)',1,'pierna',1],['tobillo','Tobillo',0,'tobillo',1],['pie','Pie',0,'pie',1]],
+  P:[['cabeza','Cabeza (posterior)',1,'cabeza'],['cervical','Columna cervical',1,'cuello'],['dorsal','Columna dorsal',1,'dorsal'],['escapula','Zona escapular',1,'escapula',1],['lumbar','Zona lumbar',1,'abdomen'],
+     ['hombro','Hombro (posterior)',0,'hombro',1],['brazo','Brazo (posterior)',0,'brazo',1],['codo','Codo (posterior)',0,'codo',1],['antebrazo','Antebrazo (posterior)',0,'antebrazo',1],['muneca','Muñeca (dorso)',1,'muneca',1],['mano','Mano (dorso)',1,'mano',1],
+     ['gluteo','Glúteo',0,'ingle',1],['sacro','Sacro y coxis',0,'sacro'],['muslo','Muslo (posterior)',0,'muslo',1],['rodilla','Hueco poplíteo',0,'rodilla',1],['pierna','Pantorrilla',1,'pierna',1],['tobillo','Tobillo y Aquiles',0,'tobillo',1],['pie','Talón',0,'pie',1]]
+};
+/* REG[id] = {view, name, d}. Vista anterior: izquierda de la pantalla = lado derecho del paciente; posterior, al revés. */
+const REG={},REG_ORDER={A:[],P:[]};
+(function(){
+  ['A','P'].forEach(v=>BM_DEF[v].forEach(([k,nm,fem,sh,pair])=>{
+    const sides=pair?['D','I']:[''];
+    sides.forEach(sd=>{
+      const mir=pair?(v==='A'?sd==='I':sd==='D'):false;
+      let name=nm;
+      if(sd){const i=nm.indexOf(' ('),w=sd==='D'?(fem?'derecha':'derecho'):(fem?'izquierda':'izquierdo');name=i>0?nm.slice(0,i)+' '+w+nm.slice(i):nm+' '+w;}
+      const id=v+'.'+k+(sd?'_'+sd:'');
+      REG[id]={view:v,name,d:shape(BM_SHAPES[sh],mir)};REG_ORDER[v].push(id);
+    });
+  }));
+})();
+const AP_T=[['subita','Súbita'],['gradual','Gradual'],['insidiosa','Insidiosa']];
+const AP_D=[['agudo','< 6 sem'],['subagudo','6 a 12 sem'],['cronico','> 12 sem']];
+const AP_DL={agudo:'menos de 6 semanas (agudo)',subagudo:'6 a 12 semanas (subagudo)',cronico:'más de 12 semanas (persistente)'};
+const LOC_T=[['localizado','Localizado'],['difuso','Difuso']];
+const CHAR=[['punzante','Punzante'],['quemante','Quemante'],['opresivo','Opresivo'],['sordo','Sordo'],['pulsatil','Pulsátil'],['electrico','Eléctrico o descarga'],['hormigueo','Hormigueo'],['adormecimiento','Adormecimiento'],['calambre','Calambre'],['tirante','Tirante']];
+const NEURO={quemante:1,electrico:1,hormigueo:1,adormecimiento:1};
+const ATEN=[['reposo','Reposo'],['mov','Movimiento suave'],['calor','Calor'],['frio','Frío'],['farmacos','Medicamentos'],['posicion','Cambio de posición'],['ejercicio','Ejercicio'],['masaje','Masaje']];
+const AGRA=[['mov','Movimiento'],['carga','Cargar peso'],['sentado','Estar sentado'],['pie','Estar de pie'],['caminar','Caminar'],['escaleras','Escaleras'],['agacharse','Agacharse'],['noche','De noche'],['despertar','Al despertar'],['tos','Toser o estornudar'],['esfuerzo','Esfuerzo']];
+const lbl=(list,v)=>{const x=list.find(a=>a[0]===v);return x?x[1]:'';};
+/* DN4: 10 ítems en 4 preguntas (Bouhassira 2005; versión española, Pérez 2007) */
+const DN4=[
+  ['¿Tiene el dolor una o más de estas características?',['Quemazón','Sensación de frío doloroso','Descargas eléctricas']],
+  ['¿Se asocia el dolor con uno o más de estos síntomas en la misma zona?',['Hormigueo','Pinchazos','Entumecimiento','Escozor o picazón']],
+  ['Exploración: ¿el dolor está en una zona donde se encuentra…?',['Hipoestesia al tacto','Hipoestesia al pinchazo']],
+  ['Exploración: en la zona dolorosa, el dolor se provoca o aumenta con…',['El roce (cepillado)']]
+];
+const DN4_FROM_CHAR={quemante:0,electrico:2,hormigueo:3,adormecimiento:5};
+/* Banderas rojas: marco IFOMPT (Finucane 2020) */
+const RF=[
+  ['Síndrome de cauda equina',1,[['ce_vej','Alteración vesical (retención, incontinencia o pérdida de sensación al orinar)'],['ce_int','Incontinencia fecal o pérdida de control intestinal'],['ce_silla','Alteración de la sensibilidad en zona perineal o «silla de montar»'],['ce_sex','Disfunción sexual de aparición reciente'],['ce_neuro','Síntomas neurológicos en ambas piernas o déficit motor progresivo']]],
+  ['Fractura',0,[['fx_trauma','Traumatismo importante (caída de altura, accidente de tránsito)'],['fx_osteo','Osteoporosis conocida o uso prolongado de corticoides'],['fx_edad','Edad avanzada con traumatismo menor']]],
+  ['Malignidad',0,[['mal_ca','Antecedente de cáncer'],['mal_peso','Baja de peso sin explicación'],['mal_noche','Dolor constante y progresivo, que no cede con reposo ni cambios de posición, o nocturno'],['mal_gen','Malestar general sin causa clara']]],
+  ['Infección',0,[['inf_fiebre','Fiebre o compromiso sistémico'],['inf_rec','Infección o procedimiento invasivo reciente en la columna'],['inf_inm','Inmunosupresión o uso de drogas intravenosas']]]
+];
+const RF_ALL={};RF.forEach(([g,urg,items])=>items.forEach(([k,l])=>{RF_ALL[k]={g,urg,l};}));
+function dn4Score(a){const n=a.filter(v=>v!=null).length,sc=a.filter(v=>v===1).length;return {n,sc};}
+function dn4Text(a){const {n,sc}=dn4Score(a);if(!n)return '';return sc+'/10'+(n<10?' (respondidas '+n+' de 10)':'')+(sc>=4?', sugiere componente neuropático':n===10?', componente neuropático poco probable':'');}
+function painBlank(){return {view:'A',mode:'p',reg:{},apT:'',apD:'',apTxt:'',locT:'',locTxt:'',now:null,worst:null,best:null,ca:[],ir:'',irTxt:'',at:[],atTxt:'',ag:[],agTxt:'',dn4:Array(10).fill(null),rf:[]};}
+let PN=painBlank();
+function enaClass(n){return n==null?'':n===0?'sin dolor':n<=3?'leve':n<=6?'moderado':'severo';}
+function enaColor(i){return 'hsl('+(120-i*12)+' 68% '+(i>=8?'62%':'58%')+')';}
+function enaHTML(id){
+  let h='<div class="ena" id="'+id+'" role="group">';
+  for(let i=0;i<=10;i++)h+='<button type="button" data-n="'+i+'" style="background:'+enaColor(i)+'" aria-pressed="false" aria-label="'+i+' de 10">'+i+'</button>';
+  return h+'</div>';
+}
+function chipsHTML(id,list){return '<div class="chips" id="'+id+'">'+list.map(([v,l])=>'<button type="button" class="chip" data-v="'+v+'" aria-pressed="false">'+esc(l)+'</button>').join('')+'</div>';}
+function regNames(t){return Object.keys(PN.reg).filter(id=>PN.reg[id]===t&&REG[id]).map(id=>REG[id].name);}
+function bmRender(){
+  const v=PN.view,sv=$('#bmSvg');
+  let h='';
+  REG_ORDER[v].forEach(id=>{const st=PN.reg[id];h+='<path class="rg'+(st?' '+st:'')+'" data-id="'+id+'" d="'+REG[id].d+'"><title>'+esc(REG[id].name)+'</title></path>';});
+  const L=v==='A'?['Derecha','Izquierda']:['Izquierda','Derecha'];
+  h+='<text class="side" x="40" y="430">'+L[0]+'</text><text class="side" x="160" y="430">'+L[1]+'</text>';
+  sv.innerHTML=h;
+  const p=Object.keys(PN.reg);
+  $('#bmList').innerHTML=p.length?p.filter(id=>REG[id]).map(id=>'<button type="button" class="chip '+PN.reg[id]+'" data-id="'+id+'" title="Quitar">'+esc(REG[id].name)+' ×</button>').join('')
+    :'<p class="small muted">Sin zonas marcadas.</p>';
+  const nA=p.filter(id=>id[0]==='A').length,nP=p.filter(id=>id[0]==='P').length;
+  seg($('#bmView'),[['A','Anterior'+(nA?' ('+nA+')':'')],['P','Posterior'+(nP?' ('+nP+')':'')]],PN.view,x=>{PN.view=x;bmRender();});
+}
+function painParts(){
+  const P=[],j=a=>a.filter(Boolean).join(', ');
+  P.push(['A','Aparición',j([lbl(AP_T,PN.apT).toLowerCase(),AP_DL[PN.apD]||'',PN.apTxt])]);
+  P.push(['L','Localización',j([regNames('p').join(', '),lbl(LOC_T,PN.locT).toLowerCase(),PN.locTxt])]);
+  const it=[];
+  if(PN.now!=null)it.push('ahora '+PN.now+'/10 ('+enaClass(PN.now)+')');
+  if(PN.worst!=null)it.push('peor en 24 h '+PN.worst+'/10');
+  if(PN.best!=null)it.push('mejor en 24 h '+PN.best+'/10');
+  P.push(['I','Intensidad (ENA)',it.join(', ')]);
+  P.push(['C','Carácter',PN.ca.map(v=>lbl(CHAR,v).toLowerCase()).join(', ')]);
+  const rr=regNames('r');
+  P.push(['I','Irradiación',PN.ir==='no'&&!rr.length?'no irradia':j([PN.ir==='si'||rr.length?'sí':'',PN.irTxt,rr.length?'hacia '+rr.join(', '):''])]);
+  P.push(['A','Atenuantes',j([PN.at.map(v=>lbl(ATEN,v).toLowerCase()).join(', '),PN.atTxt])]);
+  P.push(['A','Agravantes',j([PN.ag.map(v=>lbl(AGRA,v).toLowerCase()).join(', '),PN.agTxt])]);
+  const d=dn4Text(PN.dn4);if(d)P.push(['','DN4',d]);
+  if(PN.rf.length)P.push(['','Banderas rojas',PN.rf.map(k=>RF_ALL[k].g+': '+RF_ALL[k].l.toLowerCase()).join('; ')]);
+  return P;
+}
+function painText(){return painParts().filter(p=>p[2]).map(p=>p[1]+': '+p[2]).join(' | ');}
+function painSync(){
+  const P=painParts();
+  $('#painSum').innerHTML=P.some(p=>p[2])?P.map(p=>'<div>'+(p[0]?'<b>'+p[0]+'</b> · ':'')+esc(p[1])+': '+(p[2]?esc(p[2]):'<span class="muted">sin completar</span>')+'</div>').join('')
+    :'<p class="muted">Marca las zonas y completa la ficha para ver el resumen.</p>';
+  $('#locAuto').textContent=regNames('p').length?'Zonas marcadas: '+regNames('p').join(', '):'Marca las zonas de dolor en el dibujo.';
+  const rr=regNames('r');
+  $('#irAuto').textContent=rr.length?'Trayecto marcado: '+rr.join(', '):'Marca el trayecto en el dibujo con «Irradiación».';
+  $('#enaCls').innerHTML=PN.now==null?'<span class="status none">Elige la intensidad actual</span>':'<span class="status '+(PN.now<=3?'ok':PN.now<=6?'warn':'crit')+'">Dolor '+enaClass(PN.now)+' · '+PN.now+'/10</span>';
+  const neuro=PN.ca.some(v=>NEURO[v]);
+  $('#caHint').hidden=!neuro;
+  dn4Sync();rfSync();
+  [['#enaNow','now'],['#enaWorst','worst'],['#enaBest','best']].forEach(([s,k])=>$$('button',$(s)).forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.n===PN[k]))));
+}
+function painFormBuild(){
+  const q=(L,t,sub,body)=>'<div class="aq"><span class="L" aria-hidden="true">'+L+'</span><div class="B"><h3>'+t+(sub?'<small>'+sub+'</small>':'')+'</h3>'+body+'</div></div>';
+  const inp=(id,ph)=>'<input type="text" id="'+id+'" placeholder="'+esc(ph)+'" autocomplete="off">';
+  $('#painForm').innerHTML=
+    q('A','Aparición','¿Cuándo y cómo empezó?','<div class="seg" id="apT"></div><div class="seg" id="apD"></div>'+inp('apTxt','Ej.: hace 3 semanas, al levantar una caja'))
+   +q('L','Localización','¿Dónde duele?','<p class="small muted" id="locAuto"></p><div class="seg" id="locT"></div>'+inp('locTxt','Detalle: punto exacto, superficial o profundo'))
+   +q('I','Intensidad','Escala numérica 0 a 10',
+      '<span class="eyebrow">Ahora</span>'+enaHTML('enaNow')+'<div class="ena-ends"><span>0 sin dolor</span><span>10 el peor dolor imaginable</span></div>'
+      +'<div id="enaCls"></div>'
+      +'<span class="eyebrow">El peor en las últimas 24 h</span>'+enaHTML('enaWorst')
+      +'<span class="eyebrow">El menor en las últimas 24 h</span>'+enaHTML('enaBest'))
+   +q('C','Carácter','¿Cómo es el dolor?',chipsHTML('caChips',CHAR)+'<p class="hint" id="caHint" hidden>Quemazón, descargas eléctricas, hormigueo o adormecimiento son ítems del DN4. Ya quedaron marcados en el cuestionario: <button type="button" class="btn sm" id="caDn4" style="margin-top:6px">Completar DN4</button></p>')
+   +q('I','Irradiación','¿Se corre hacia otra zona?','<div class="seg" id="irOn"></div><p class="small muted" id="irAuto"></p>'+inp('irTxt','Ej.: desde la zona lumbar por detrás del muslo hasta la rodilla'))
+   +q('A','Atenuantes','¿Qué lo alivia?',chipsHTML('atChips',ATEN)+inp('atTxt','Otro'))
+   +q('A','Agravantes','¿Qué lo empeora?',chipsHTML('agChips',AGRA)+inp('agTxt','Otro'));
+  seg($('#apT'),AP_T,PN.apT,v=>{PN.apT=v;painSync();});
+  seg($('#apD'),AP_D,PN.apD,v=>{PN.apD=v;painSync();});
+  seg($('#locT'),LOC_T,PN.locT,v=>{PN.locT=v;painSync();});
+  seg($('#irOn'),[['no','No'],['si','Sí']],PN.ir,v=>{PN.ir=v;if(v==='si'){PN.mode='r';bmModeSeg();}painSync();});
+  ['apTxt','locTxt','irTxt','atTxt','agTxt'].forEach(k=>{const el=$('#'+k);el.value=PN[k];el.oninput=()=>{PN[k]=el.value.trim();painSync();};});
+  [['#enaNow','now'],['#enaWorst','worst'],['#enaBest','best']].forEach(([s,k])=>{
+    $(s).onclick=e=>{const b=e.target.closest('button');if(!b)return;const n=+b.dataset.n;PN[k]=PN[k]===n?null:n;painSync();};
+  });
+  [['#caChips','ca'],['#atChips','at'],['#agChips','ag']].forEach(([s,k])=>{
+    $$('.chip',$(s)).forEach(b=>b.setAttribute('aria-pressed',String(PN[k].indexOf(b.dataset.v)>=0)));
+    $(s).onclick=e=>{
+      const b=e.target.closest('.chip');if(!b)return;
+      const v=b.dataset.v,i=PN[k].indexOf(v);
+      if(i>=0)PN[k].splice(i,1);else PN[k].push(v);
+      if(k==='ca'&&i<0&&v in DN4_FROM_CHAR&&PN.dn4[DN4_FROM_CHAR[v]]==null)PN.dn4[DN4_FROM_CHAR[v]]=1;
+      b.setAttribute('aria-pressed',String(i<0));painSync();
+    };
+  });
+  $('#caDn4').onclick=()=>{$('#dn4Box').open=true;$('#dn4Box').scrollIntoView({block:'start',behavior:'smooth'});};
+  dn4Build();rfBuild();
+  painSync();
+}
+function dn4Build(){
+  let h='',i=0;
+  DN4.forEach(([q,items],qi)=>{
+    h+='<div class="qh">'+(qi+1)+'. '+esc(q)+'</div>';
+    items.forEach(t=>{h+='<div class="yn"><span>'+esc(t)+'</span><div class="seg" data-i="'+i+'"></div></div>';i++;});
+  });
+  $('#dn4Items').innerHTML=h;
+  $$('#dn4Items .seg').forEach(el=>{const k=+el.dataset.i;
+    seg(el,[['1','Sí'],['0','No']],PN.dn4[k]==null?'':String(PN.dn4[k]),v=>{PN.dn4[k]=+v;painSync();});});
+}
+function dn4Sync(){
+  $$('#dn4Items .seg').forEach(el=>{const v=PN.dn4[+el.dataset.i];$$('button',el).forEach(b=>b.setAttribute('aria-pressed',String(v!=null&&b.dataset.v===String(v))));});
+  const {n,sc}=dn4Score(PN.dn4),bd=$('#dn4Badge'),rs=$('#dn4Res');
+  if(!n){bd.className='status none';bd.textContent='Sin aplicar';rs.innerHTML='';return;}
+  const cls=sc>=4?'warn':n===10?'ok':'none';
+  bd.className='status '+cls;bd.textContent=sc+'/10';
+  rs.innerHTML='<div class="readout"><span class="eyebrow">Puntaje</span><div class="ena-big">'+sc+'<span class="muted" style="font-size:.5em"> / 10</span></div><span class="status '+cls+'">'
+    +(sc>=4?'4 o más: sugiere un componente neuropático':n===10?'Menos de 4: componente neuropático poco probable':'Faltan '+(10-n)+' ítems por responder')+'</span></div>';
+}
+function rfBuild(){
+  $('#rfItems').innerHTML=RF.map(([g,urg,items])=>'<div class="rfg"><span class="eyebrow">'+esc(g)+(urg?' · urgente':'')+'</span>'
+    +items.map(([k,l])=>'<label class="check"><input type="checkbox" data-rf="'+k+'"'+(PN.rf.indexOf(k)>=0?' checked':'')+'><span>'+esc(l)+'</span></label>').join('')+'</div>').join('');
+  $('#rfItems').onchange=e=>{const c=e.target.closest('[data-rf]');if(!c)return;const k=c.dataset.rf,i=PN.rf.indexOf(k);
+    if(c.checked&&i<0)PN.rf.push(k);if(!c.checked&&i>=0)PN.rf.splice(i,1);painSync();};
+}
+function rfSync(){
+  $$('#rfItems [data-rf]').forEach(c=>{c.checked=PN.rf.indexOf(c.dataset.rf)>=0;});
+  const bd=$('#rfBadge'),rs=$('#rfRes'),n=PN.rf.length,urg=PN.rf.some(k=>RF_ALL[k].urg);
+  if(!n){bd.className='status none';bd.textContent='Ninguna marcada';rs.innerHTML='';return;}
+  bd.className='status '+(urg?'crit':'warn');bd.textContent=n+(n===1?' bandera':' banderas');
+  const groups=[...new Set(PN.rf.map(k=>RF_ALL[k].g))];
+  rs.innerHTML='<span class="status '+(urg?'crit':'warn')+'">'+(urg
+    ?'Sospecha de síndrome de cauda equina: requiere derivación médica urgente el mismo día.'
+    :'Revisa la sospecha de '+esc(groups.join(', ').toLowerCase())+'. Según el nivel de sospecha, monitoriza o deriva a evaluación médica.')+'</span>';
+}
+function bmModeSeg(){seg($('#bmMode'),[['p','Dolor'],['r','Irradiación']],PN.mode,v=>{PN.mode=v;});}
+function painReset(){PN=painBlank();$('#painNote').value='';$('#dn4Box').open=false;$('#rfBox').open=false;bmModeSeg();bmRender();painFormBuild();}
+function sanitizePain(x){
+  if(!x||typeof x!=='object')return undefined;
+  const str=(v,n)=>String(v==null?'':v).slice(0,n||300);
+  const ena=v=>(v!=null&&isFinite(+v)&&+v>=0&&+v<=10)?Math.round(+v):null;
+  const arr=(a,list)=>Array.isArray(a)?a.filter(v=>list.some(l=>l[0]===v)):[];
+  const reg={};
+  if(x.reg&&typeof x.reg==='object')Object.keys(x.reg).forEach(id=>{if(REG[id]&&(x.reg[id]==='p'||x.reg[id]==='r'))reg[id]=x.reg[id];});
+  const dn4=Array(10).fill(null);
+  if(Array.isArray(x.dn4))x.dn4.slice(0,10).forEach((v,i)=>{if(v===0||v===1)dn4[i]=v;});
+  return {reg,apT:str(x.apT,20),apD:str(x.apD,20),apTxt:str(x.apTxt),locT:str(x.locT,20),locTxt:str(x.locTxt),now:ena(x.now),worst:ena(x.worst),best:ena(x.best),
+    ca:arr(x.ca,CHAR),ir:str(x.ir,4),irTxt:str(x.irTxt),at:arr(x.at,ATEN),atTxt:str(x.atTxt),ag:arr(x.ag,AGRA),agTxt:str(x.agTxt),
+    dn4,rf:Array.isArray(x.rf)?x.rf.filter(k=>RF_ALL[k]):[]};
+}
+function initPain(){
+  bmModeSeg();bmRender();painFormBuild();
+  $('#bmSvg').addEventListener('click',e=>{
+    const t=e.target.closest('.rg');if(!t)return;
+    const id=t.dataset.id;
+    if(PN.reg[id]===PN.mode)delete PN.reg[id];else PN.reg[id]=PN.mode;
+    if(PN.mode==='r'&&PN.reg[id]==='r'&&PN.ir!=='si'){PN.ir='si';seg($('#irOn'),[['no','No'],['si','Sí']],PN.ir,v=>{PN.ir=v;painSync();});}
+    bmRender();painSync();
+  });
+  $('#bmList').onclick=e=>{const b=e.target.closest('[data-id]');if(!b)return;delete PN.reg[b.dataset.id];bmRender();painSync();};
+  $('#bmClear').onclick=()=>{PN.reg={};bmRender();painSync();};
+  $('#painSave').onclick=()=>{
+    if(PN.now==null){toast('Indica la intensidad actual del dolor (0 a 10)');$('#enaNow').scrollIntoView({block:'center',behavior:'smooth'});return;}
+    if(!needPatient())return;
+    const pain=sanitizePain(PN);
+    addRecord({kind:'dolor',key:'dolor_ena',label:'Dolor · ENA actual',side:'',value:PN.now,unit:'/10',text:painText(),note:$('#painNote').value.trim(),pain});
+    painReset();window.scrollTo(0,0);
+  };
+  hooks.resetPain=painReset;
+  hooks.dolor=()=>{bmRender();};
+}
+
 /* ---------- historial ---------- */
 const H={filter:'all'};
 let hDelId=null,hDelT=0;
 const sideTxt=s=>s==='D'?' (derecho)':s==='I'?' (izquierdo)':'';
 function recValue(r){
   if(r.kind==='rom')return r.value+'°';
+  if(r.kind==='dolor')return r.value+'/10';
   if(r.kind==='prueba'){
     if(r.value==null)return r.res||'';
     if(r.unit==='s')return t1(r.value)+' s';
@@ -1316,8 +1739,8 @@ function recValue(r){
   }
   return '';
 }
-function betterDown(r){return r.key==='tug'||(r.kind==='rom'&&r.ref===0);}
-function unitOf(r){return r.kind==='rom'?'°':r.unit==='rep'?' rep':' '+r.unit;}
+function betterDown(r){return r.key==='tug'||r.kind==='dolor'||(r.kind==='rom'&&r.ref===0);}
+function unitOf(r){return r.kind==='rom'?'°':r.kind==='dolor'?'/10':r.unit==='rep'?' rep':' '+r.unit;}
 function spark(vals){
   const w=96,h=28,pad=3,mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals),sp=(mx-mn)||1;
   const pts=vals.map((v,i)=>[pad+i*(w-2*pad)/(vals.length-1),h-pad-(v-mn)/sp*(h-2*pad)]);
@@ -1353,12 +1776,13 @@ function renderHistory(){
     const good=d===0?0:((d<0)===down?1:-1);
     const col=good>0?'var(--ok)':good<0?'var(--crit)':'var(--muted)';
     const u=unitOf(l);
-    return '<div class="evo"><div style="min-width:0"><div style="font-weight:600">'+esc(l.label)+sideTxt(l.side)+'</div><div class="small muted mono">'+num(f.value)+u+' a '+num(l.value)+u+' · '+a.length+' mediciones</div></div>'+spark(a.map(x=>x.value))+'<div class="delta" style="color:'+col+'">'+(d>0?'+':d<0?'−':'')+num(Math.abs(d))+u+'</div></div>';
+    const mcid=l.kind==='dolor'&&(Math.abs(d)>=2||(f.value>0&&Math.abs(d)/f.value>=.3))?'<div class="small" style="color:'+col+'">'+(d<0?'Reducción':'Aumento')+' clínicamente importante (≥ 2 puntos o ≥ 30 %)</div>':'';
+    return '<div class="evo"><div style="min-width:0"><div style="font-weight:600">'+esc(l.label)+sideTxt(l.side)+'</div><div class="small muted mono">'+num(f.value)+u+' a '+num(l.value)+u+' · '+a.length+' mediciones</div>'+mcid+'</div>'+spark(a.map(x=>x.value))+'<div class="delta" style="color:'+col+'">'+(d>0?'+':d<0?'−':'')+num(Math.abs(d))+u+'</div></div>';
   }).join(''):'<p class="small muted">Cuando repitas una medición o una prueba, aquí verás la evolución con su gráfico.</p>';
   $('#hList').innerHTML=list.length?'<span class="eyebrow">Registros</span>'+list.map(r=>{
     const meta=[fmtDate(r.ts),r.text,r.note].filter(Boolean).join(' · ');
     return '<div class="rec"><div class="t">'+esc(r.label)+sideTxt(r.side)+'</div><div class="v">'+esc(recValue(r))+'</div><div class="m">'+esc(meta)+' <button type="button" class="btn sm ghost" data-del="'+r.id+'" style="min-height:28px;padding:0 8px;font-size:12px">'+(hDelId===r.id?'Confirmar':'Eliminar')+'</button></div></div>';
-  }).join(''):'<div class="empty-state"><p>Sin registros en esta categoría.</p><p class="small">Guarda mediciones desde Medir, Postura o Pruebas.</p></div>';
+  }).join(''):'<div class="empty-state"><p>Sin registros en esta categoría.</p><p class="small">Guarda mediciones desde Medir, Postura, Pruebas o Dolor.</p></div>';
 }
 function hText(){
   const p=patient(),rows=hRecords().slice().reverse();
@@ -1372,7 +1796,7 @@ function hText(){
   return L.join('\n');
 }
 function initHistory(){
-  seg($('#hFilter'),[['all','Todo'],['rom','Rangos'],['postura','Postura'],['prueba','Pruebas']],H.filter,v=>{H.filter=v;renderHistory();});
+  seg($('#hFilter'),[['all','Todo'],['rom','Rangos'],['postura','Postura'],['prueba','Pruebas'],['dolor','Dolor']],H.filter,v=>{H.filter=v;renderHistory();});
   $('#v-historial').onclick=e=>{
     const go=e.target.closest('[data-go]');if(go){showView(go.dataset.go);return;}
     const d=e.target.closest('[data-del]');
@@ -1425,7 +1849,7 @@ function csvCell(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"';}
 function hCsv(){
   const rows=hRecords().slice().reverse();
   const head=['Fecha','Tipo','Evaluación','Lado','Valor','Unidad','Referencia','Detalle','Nota'];
-  const tipo={rom:'Rango articular',postura:'Postura',prueba:'Prueba funcional'};
+  const tipo={rom:'Rango articular',postura:'Postura',prueba:'Prueba funcional',dolor:'Dolor (ALICIAA)'};
   const lines=[head.map(csvCell).join(';')].concat(rows.map(r=>[
     isoLocal(r.ts),tipo[r.kind]||r.kind,r.label,r.side==='D'?'Derecho':r.side==='I'?'Izquierdo':'',
     r.value==null?'':String(r.value).replace('.',','),r.unit||'',r.ref?String(r.ref):'',r.text||'',r.note||''
@@ -1447,7 +1871,7 @@ function backupJson(){
 function restoreFrom(text){
   let d;try{d=JSON.parse(text);}catch(e){return null;}
   if(!d||d.app!=='arco'||!Array.isArray(d.patients)||!Array.isArray(d.records))return null;
-  const kinds={rom:1,postura:1,prueba:1};
+  const kinds={rom:1,postura:1,prueba:1,dolor:1};
   const have=new Set(DB.patients.map(p=>p.id)),haveR=new Set(DB.records.map(r=>r.id));
   let np=0,nr=0;
   d.patients.forEach(p=>{
@@ -1458,7 +1882,7 @@ function restoreFrom(text){
   });
   d.records.forEach(r=>{
     if(r&&typeof r.id==='string'&&typeof r.pid==='string'&&have.has(r.pid)&&kinds[r.kind]&&typeof r.label==='string'&&isFinite(+r.ts)&&!haveR.has(r.id)){
-      DB.records.push({id:r.id,pid:r.pid,ts:+r.ts,kind:r.kind,key:String(r.key||''),label:r.label.slice(0,160),side:r.side==='D'||r.side==='I'?r.side:'',value:(r.value!=null&&isFinite(+r.value))?+r.value:null,unit:String(r.unit||'').slice(0,8),res:String(r.res||'').slice(0,80),ref:r.ref?+r.ref:undefined,text:String(r.text||'').slice(0,400),note:String(r.note||'').slice(0,600)});
+      DB.records.push({id:r.id,pid:r.pid,ts:+r.ts,kind:r.kind,key:String(r.key||''),label:r.label.slice(0,160),side:r.side==='D'||r.side==='I'?r.side:'',value:(r.value!=null&&isFinite(+r.value))?+r.value:null,unit:String(r.unit||'').slice(0,8),res:String(r.res||'').slice(0,80),ref:r.ref?+r.ref:undefined,text:String(r.text||'').slice(0,1500),note:String(r.note||'').slice(0,600),pain:r.kind==='dolor'?sanitizePain(r.pain):undefined});
       haveR.add(r.id);nr++;
     }
   });
@@ -1469,7 +1893,7 @@ function restoreFrom(text){
 function initExport(){
   $('#hCsv').onclick=async()=>{
     if(!patient())return;
-    await dlSave('arco_'+slug(patient().name)+'_'+today()+'.csv',hCsv(),'No se pudo descargar. Usa «Copiar resumen».');
+    await dlSave('evaluacion_'+slug(patient().name)+'_'+today()+'.csv',hCsv(),'No se pudo descargar. Usa «Copiar resumen».');
   };
   $('#hPdf').onclick=async()=>{
     if(!patient())return;
@@ -1478,7 +1902,7 @@ function initExport(){
     if(!bytes){toast('No se pudo preparar el PDF. Revisa la conexión e inténtalo de nuevo.');return;}
     await dlSave('informe_'+slug(patient().name)+'_'+today()+'.pdf',new Blob([bytes],{type:'application/pdf'}),'No se pudo descargar el PDF.');
   };
-  $('#bkSave').onclick=()=>dlSave('arco_respaldo_'+today()+'.json',backupJson(),'No se pudo descargar el respaldo.');
+  $('#bkSave').onclick=()=>dlSave('evaluacion_inicial_respaldo_'+today()+'.json',backupJson(),'No se pudo descargar el respaldo.');
   $('#bkLoad').onclick=()=>$('#bkIn').click();
   $('#bkIn').onchange=()=>{
     const f=$('#bkIn').files&&$('#bkIn').files[0];
@@ -1487,7 +1911,7 @@ function initExport(){
     const rd=new FileReader();
     rd.onload=()=>{
       const res=restoreFrom(String(rd.result));
-      if(!res){toast('El archivo no es un respaldo de Arco válido');return;}
+      if(!res){toast('El archivo no es un respaldo válido de Evaluación Inicial');return;}
       updateChip();renderPatients();
       toast(res.np||res.nr?'Restaurado: '+res.np+(res.np===1?' paciente':' pacientes')+' y '+res.nr+(res.nr===1?' registro':' registros'):'El respaldo no trae datos nuevos');
     };
@@ -1528,7 +1952,7 @@ async function buildPdf(){
   };
 
   y-=22;txt('Informe de evaluación kinésica',M,20,fB,INK);
-  y-=16;txt('Generado el '+fmtDate(Date.now())+' con Arco',M,9,fR,MUT);
+  y-=16;txt('Generado el '+fmtDate(Date.now())+' con Evaluación Inicial',M,9,fR,MUT);
   y-=9;page.drawLine({start:{x:M,y},end:{x:M+mm(24),y},thickness:2,color:ACC});
   y-=26;txt(p.name,M,14,fB,INK);
   const bits=[p.age?p.age+' años':'',p.sex==='F'?'Femenino':p.sex==='M'?'Masculino':''].filter(Boolean).join(' · ');
@@ -1585,8 +2009,42 @@ async function buildPdf(){
     table([{h:'Fecha',w:24},{h:'Vista',w:44},{h:'Hallazgos',w:106}],
       pos.map(r=>[fmtDate(r.ts),r.label,[r.text,r.note].filter(Boolean).join(' · ')]));
   }
+  const dol=asc.filter(r=>r.kind==='dolor');
+  if(dol.length){
+    section('Dolor (ALICIAA)');
+    const RED=C([217,65,47]),ORA=C([240,164,41]),BASE=C([232,238,240]),EDGE=C([140,160,168]);
+    const sc=0.40,fw=200*sc,fh=436*sc;
+    dol.forEach(r=>{
+      const parts=String(r.text||'').split(' | ').filter(Boolean);
+      const lines=[];parts.forEach(pt=>wrap(pt,CW-2*fw-mm(10),9,fR).forEach((l,i)=>lines.push([l,i===0])));
+      const hasMap=r.pain&&r.pain.reg&&Object.keys(r.pain.reg).length;
+      const blockH=Math.max(lines.length*12+30,hasMap?fh+30:0);
+      need(Math.min(blockH,PH-2*M-BOT));
+      y-=18;txt(fmtDate(r.ts)+'  ·  ENA actual '+r.value+'/10 ('+enaClass(r.value)+')',M,10.5,fB,INK);
+      const top=y-8;let ty=top;
+      lines.forEach(([l])=>{ty-=12;page.drawText(l,{x:M,y:ty,size:9,font:fR,color:INK});});
+      if(r.note){wrap('Nota: '+r.note,CW-2*fw-mm(10),9,fR).forEach(l=>{ty-=12;page.drawText(l,{x:M,y:ty,size:9,font:fR,color:MUT});});}
+      if(hasMap){
+        ['A','P'].forEach((v,vi)=>{
+          const ox=PW-M-2*fw+vi*fw;
+          REG_ORDER[v].forEach(id=>{
+            const st=r.pain.reg[id];
+            page.drawSvgPath(REG[id].d,{x:ox,y:top,scale:sc,color:st==='p'?RED:st==='r'?ORA:BASE,borderColor:EDGE,borderWidth:0.4});
+          });
+          const lb=v==='A'?'Anterior':'Posterior',w=fR.widthOfTextAtSize(lb,8);
+          page.drawText(lb,{x:ox+fw/2-w/2,y:top-fh-2,size:8,font:fB,color:MUT});
+          const sd=v==='A'?['D','I']:['I','D'];
+          page.drawText(sd[0],{x:ox+fw*0.18,y:top-fh+6,size:7,font:fR,color:MUT});
+          page.drawText(sd[1],{x:ox+fw*0.78,y:top-fh+6,size:7,font:fR,color:MUT});
+        });
+        ty=Math.min(ty,top-fh-14);
+      }
+      y=ty-6;rule(0.3);
+    });
+    y-=12;txt('Rojo: dolor. Naranjo: irradiación. D/I: lado del paciente.',M,8,fR,MUT);
+  }
   pages.forEach((pg,i)=>{
-    pg.drawText(pdfSafe('Valores de referencia orientativos (AAOS, EMPAM-MINSAL, STEADI y otros). No reemplaza el juicio clínico.'),{x:M,y:mm(12),size:8,font:fR,color:MUT});
+    pg.drawText(pdfSafe('Referencias orientativas (AAOS, EMPAM-MINSAL, STEADI, ENA: Farrar 2001). No reemplaza el juicio clínico.'),{x:M,y:mm(12),size:8,font:fR,color:MUT});
     const t='Página '+(i+1)+' de '+pages.length;
     pg.drawText(t,{x:PW-M-fR.widthOfTextAtSize(t,8),y:mm(12),size:8,font:fR,color:MUT});
   });
@@ -1596,7 +2054,7 @@ async function buildPdf(){
 /* ---------- inicio ---------- */
 function boot(){
   if(!loadDB()){seed();saveDB();}
-  buildTabs();initPatients();initGonio();initPosture();initTests();initHistory();initExport();
+  buildTabs();initPatients();initGonio();initPosture();initTests();initPain();initHistory();initExport();
   updateChip();updateStoreNote();
   showView('medir');
 }

@@ -1,5 +1,5 @@
-/* Arco: copia local para abrir sin conexión. Sube el número de versión al actualizar los archivos. */
-const CACHE = 'arco-v1';
+/* Evaluación Inicial: copia local para abrir sin conexión. Sube el número de versión al actualizar los archivos. */
+const CACHE = 'evaluacion-inicial-v3';
 const FILES = ['./', 'index.html', 'manifest.webmanifest', 'pdf-lib.min.js', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));

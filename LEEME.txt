@@ -1,9 +1,29 @@
-ARCO - versión instalable
-=========================
+EVALUACIÓN INICIAL - versión instalable (antes "Arco")
+=====================================================
 
-Por qué existe esta versión
-Dentro de Claude el navegador bloquea los sensores del celular. Publicada en una
-dirección https propia, Arco puede usar el acelerómetro como inclinómetro.
+Novedades de esta versión
+- Nuevo nombre: Evaluación Inicial.
+- Medir > Inclinómetro: goniómetro tipo brújula. El brazo fijo marca 0° arriba,
+  la aguja sigue el segmento y una marca naranja deja el máximo alcanzado.
+- Nuevo modo "Brújula" para giros en el plano horizontal (rotación cervical y
+  de tronco), con el celular plano y la pantalla hacia arriba. Es menos
+  confiable que el inclinómetro: alejar de metales e imanes y repetir.
+- Nueva pestaña Dolor: mapa corporal anterior y posterior donde el paciente
+  toca dónde le duele (rojo) y hacia dónde irradia (naranjo), escala numérica
+  0 a 10 (ahora, peor y menor en 24 h) y ficha ALICIAA: Aparición,
+  Localización, Intensidad, Carácter, Irradiación, Atenuantes y Agravantes.
+  Se guarda en la ficha, aparece en Historial, CSV e Informe PDF (con el mapa).
+- Dolor > Cuestionario DN4 (10 ítems, corte 4/10, versión española de Pérez
+  2007). Si eliges quemazón, descarga eléctrica, hormigueo o adormecimiento en
+  Carácter, esos ítems quedan marcados.
+- Dolor > Banderas rojas de columna según el marco IFOMPT (Finucane 2020):
+  cauda equina (alerta urgente), fractura, malignidad e infección.
+
+Cómo actualizar si ya tenías Arco publicada
+- Reemplaza los archivos en la MISMA dirección https: las fichas se conservan.
+- Si publicas en una dirección nueva, antes descarga un respaldo en la versión
+  antigua (Pacientes > Descargar respaldo) y restáuralo en la nueva. Los
+  respaldos de Arco son compatibles.
 
 1) Publicar (una sola vez, gratis)
    Opción A, Netlify Drop: entra a https://app.netlify.com/drop, arrastra esta
@@ -17,13 +37,9 @@ dirección https propia, Arco puede usar el acelerómetro como inclinómetro.
    iPhone: abre la dirección en Safari > Compartir > Agregar a pantalla de inicio.
    Android: abre la dirección en Chrome > menú > Instalar aplicación.
 
-3) Usar el inclinómetro
+3) Usar el inclinómetro o la brújula
    Medir > Inclinómetro > Iniciar sensor. En iPhone, acepta el permiso
    "Movimiento y orientación".
 
-4) Pasar tus fichas desde la versión de Claude
-   En la versión de Claude: Pacientes > Descargar respaldo.
-   En la versión instalada: Pacientes > Restaurar respaldo.
-
-Actualizaciones: reemplaza los archivos publicados. Si cambias index.html, sube el
-número de versión de CACHE en sw.js (por ejemplo arco-v2).
+Actualizaciones futuras: si cambias index.html, sube el número de versión de
+CACHE en sw.js (por ejemplo evaluacion-inicial-v4).
